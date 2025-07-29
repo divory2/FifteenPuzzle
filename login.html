@@ -5,19 +5,23 @@
 <body>
     <div><h1>Fiffteen Puzzle</h1></div>
     <div class="login-form-container">
-        <form class="form-fields" >
+        <form name="registrationForm" class="form-fields"  onsubmit="return validateForm()" action="loginForm.php" method="post">
             <div class="password-container">
-                <h1>Player Name</h1>
-            <input id="playerName" type="text">
+                <h1 id="playerHeader">Player Name</h1>
+            <input id="playerName" type="text" name="Player">
 
             </div>
             <div class="password-container">
-                <h1>Password</h1>
-                <input id="password"type="password">
+                <h1 id="passwordHeader">Password</h1>
+                <input id="password"type="password" name="password">
+            </div>
+            <div>
+                <input type="submit" name="submit" id="login" value="Register">
             </div>
             
 
         </form>
+        <script type="text/javascript" src="validation.js"></script>
 
     </div>
     
