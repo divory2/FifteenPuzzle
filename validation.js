@@ -29,11 +29,11 @@ function validateForm(){
     }
     
     else{
-        if((formPasswordError && formPlayerError)){
+        
             printError("passwordHeader", "Password");
             printError("playerHeader","Player Name");
 
-        }
+        
     }
     return isValid;
 }function printError(elemId, hintMsg) {

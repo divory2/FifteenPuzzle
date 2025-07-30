@@ -1,4 +1,6 @@
 <?php
+ob_start();  // Start output buffering
+
  $isvalid = true;
  
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -73,29 +75,35 @@ $result = $conn->query($isplayer);
 
 if ($result) {
     if ($result->num_rows > 0) {
+        echo"query for player if player exists <br>";
         // Loop through results (should really be only 1 if player names are unique)
-        while ($row = $result->fetch_assoc()) {
-            if ($row["player"] == $player) {
-                if (password_verify($password, $row["player_password"])) {
-                    //echo "Player and password found, redirecting...";
-                    header("Location: game.html");
-                    exit;
-                } else {
-                    // Password mismatch
-                   // echo "Password incorrect";
-                    header("Location: login.html?error=password_incorrect");
-                    exit;
-                }
+        $row = $result->fetch_assoc();
+        echo"Player name". $row["player"];
+        echo "Player name from user: $player";
+
+        if ($row && $row["player"] == $player) {
+            if (password_verify($password, $row["player_password"])) {
+                echo"password is correct";
+                header("Location: game.html");
+                exit;
+            } else {
+                header("Location: login.html?error=password_incorrect");
+                exit;
             }
         }
-    } else {
+        else{
+            header("Location: login.html?error=player_not_found");
+            exit;
+        }
+        
+ } else {
         // No player found
        // echo "Player not found";
         header("Location: login.html?error=player_not_found");
         exit;
     }
 } else {
-   // echo "Error running query: " . $conn->error;
+   echo "Error running query: " . $conn->error;
 }
 
 
@@ -128,5 +136,5 @@ if ($result) {
     
 
 }
-
+ob_end_flush(); // Flush output at the end
 ?>
