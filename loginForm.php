@@ -1,7 +1,10 @@
 <?php
+ $isvalid = true;
+ 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $player = $_POST['Player'];
     $password = $_POST['password'];
+   
     // TODO: connect to DB and insert data safely
     echo "Player: $player, Password: $password";
     
@@ -37,6 +40,47 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
     // After successful connection ($conn) and before inserts:
 
+// Allow login_date and logout_date to be NULL by default
+$isplayer = "SELECT player FROM PLAYER WHERE player= '$player'";
+//$alter2 = "ALTER TABLE PLAYER MODIFY logout_date DATE DEFAULT NULL";
+$result = $conn->query($isplayer);
+if ($result) {
+    if($result && $result->num_rows > 0){
+        while ($row = $result->fetch_assoc()) {
+            if ($row["player"] == $player) {
+                echo "player Found <br>";
+                $GLOBALS['$isvalid'] = true;
+            
+                 }
+        if (password_verify($password,$row[" player_password"])) { //verifying user password with password in db
+                    echo "password found";
+                    $GLOBALS['$isvalid'] = true;
+            }
+            else{
+                $GLOBALS['$isvalid'] = false;
+            }
+     }
+    echo "player is registered<br>";
+
+    } 
+    else{
+        $GLOBALS['$isvalid'] = false;
+        echo "not found <br>";
+        header("Location: login.html?error=player not found");
+        exit();
+    
+
+    }
+}
+else {
+    echo "Error Selecting query: " . $conn->error . "<br>";
+}
+
+// if ($conn->query($alter2) === TRUE) {
+//     echo "logout_date column altered successfully.<br>";
+// } else {
+//     echo "Error altering logout_date: " . $conn->error . "<br>";
+// }
 
 
 
@@ -72,6 +116,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
     $conn->close();
     
+
 }
 
 ?>
