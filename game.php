@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['player'])) {
-    header("Location: login.html?error=not_logged_in");
+    header("Location: login.php?error=not_logged_in");
     exit();
 }
 ?>
