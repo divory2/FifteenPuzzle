@@ -2,8 +2,18 @@
 
 window.onload = function() {
     const params = new URLSearchParams(window.location.search);
-    if (params.get('error') === 'player not found') {
-        alert('Player not found!');
+    if (params.get('error') === 'player_not_found') {
+        alert('Player not Registered!');
+
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+    else if (params.get('error') === 'password_incorrect') {
+        alert('Incorrect Paassword!');
+
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+    else if (params.get('error') === 'Wrong_player_name') {
+        alert('Player Name is incorrect');
 
         window.history.replaceState({}, document.title, window.location.pathname);
     }
