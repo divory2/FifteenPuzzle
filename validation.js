@@ -32,6 +32,11 @@ window.onload = function() {
 
         window.history.replaceState({}, document.title, window.location.pathname);
     }
+    else if (params.get('error') === 'not_logged_in') {
+        
+
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
 }
 function validateForm(event){
     let password = document.registrationForm.Player.value;
