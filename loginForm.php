@@ -70,8 +70,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 // Allow login_date and logout_date to be NULL by default
 //$alter2 = "ALTER TABLE PLAYER MODIFY logout_date DATE DEFAULT NULL";
 
+$currentTime = date("Y-m-d H:i:s");
+$isplayer = "SELECT player, player_password, player_role, id FROM PLAYER WHERE player = '$player'";
 
-$isplayer = "SELECT player, player_password, player_role FROM PLAYER WHERE player = '$player'";
 $result = $conn->query($isplayer);
 
 if ($result) {
@@ -87,6 +88,14 @@ if ($result) {
                 $_SESSION["player"] = $player;
                  $_SESSION["role"] = $row["player_role"];
                  $_SESSION["gameStart"] = "true";
+                 $_SESSION["playerId"] = $row["id"];
+                 // query to update login date
+                //  $loginTime = "UPDATE PLAYER SET login_date = '$currentTime' WHERE id = '{$_SESSION["playerId"]}'";
+                // // if($conn->query($loginTime) === TRUE) {
+                    
+                // // }else{
+                // //     echo "Error running query: " . $conn->error;
+                // // }
                 echo"password is correct";
                 header("Location: game.php?player=" . urlencode($player) . "&role=" . urlencode($row["player_role"]));
                 exit();
