@@ -17,6 +17,21 @@ window.onload = function() {
 
         window.history.replaceState({}, document.title, window.location.pathname);
     }
+    else if (params.get('error') === 'password_incorrect_register') {
+        alert('Player is already Registerd incorrect password Please click login');
+
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+    else if (params.get('error') === 'wrong_player_casing') {
+        alert('Player is already Registerd player name casing is wrong Please click login');
+
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+    else if (params.get('error') === 'registred') {
+        alert('Player is already Registerd Please click login');
+
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
 }
 function validateForm(event){
     let password = document.registrationForm.Player.value;
