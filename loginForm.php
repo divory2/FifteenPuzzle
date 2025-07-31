@@ -85,22 +85,22 @@ if ($result) {
             if (password_verify($password, $row["player_password"])) {
                 echo"password is correct";
                 header("Location: game.html");
-                exit;
+                exit();
             } else {
                 header("Location: login.html?error=password_incorrect");
-                exit;
+                exit();
             }
         }
         else{
-            header("Location: login.html?error=player_not_found");
-            exit;
+            header("Location: login.html?error=Wrong_player_name");
+            exit();
         }
         
  } else {
         // No player found
        // echo "Player not found";
-        header("Location: login.html?error=player_not_found");
-        exit;
+        header("Location: login.html?error=player_not_registered");
+        exit();
     }
 } else {
    echo "Error running query: " . $conn->error;
