@@ -1,5 +1,7 @@
 <?php
 
+
+
 if($_SERVER["REQUEST_METHOD"] == "POST"){
 
 
@@ -76,7 +78,7 @@ foreach ($data as $user) {
         
         // send player name and and role to frontend
 
-        header("Location: game.html?player=" . urlencode($player) . "&role=player");
+        header("Location: game.php?player=" . urlencode($player) . "&role=player");
         exit();
 
       
