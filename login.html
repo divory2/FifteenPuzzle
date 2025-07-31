@@ -5,7 +5,8 @@
 <body>
     <div><h1>Fiffteen Puzzle</h1></div>
     <div class="login-form-container">
-        <form name="registrationForm" class="form-fields"  onsubmit="return validateForm()" action="loginForm.php" method="post">
+        <form name="registrationForm" class="form-fields"  onsubmit="return validateForm(event)" action="loginForm.php" method="post">
+            <!-- form fields -->
             <div class="password-container">
                 <h1 id="playerHeader">Player Name</h1>
             <input id="playerName" type="text" name="Player">
@@ -16,7 +17,11 @@
                 <input id="password"type="password" name="password">
             </div>
             <div>
-                <input type="submit" name="submit" id="login" value="Register">
+                <input type="submit" name="login" id="login" value="Login" data-value="login" >
+                
+            </div>
+            <div>
+                <input type="submit" name="register" id="register" value="register">
             </div>
             
 
