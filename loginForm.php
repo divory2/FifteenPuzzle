@@ -2,7 +2,7 @@
 ob_start();  // Start output buffering
 
  $isvalid = true;
- 
+ $isRgisterd = false;
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $player = $_POST['Player'];
     $password = $_POST['password'];
