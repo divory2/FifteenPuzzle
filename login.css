@@ -22,8 +22,67 @@ body{
     justify-content: center;
     vertical-align:middle;
 }
-.password-container{
-    
+
+
+.menu-container{
+    width: 100%;
+    height: 300px;
+    border: solid blue 4px;
+    display: flex;
+    justify-content: space-between
+
+}
+form{
+    display: flex;
+    gap: 50%;
+}
+
+
+.menu-container form select{
+    width: 150px;
+}
+.selector-container{
+    display: flex;
+    flex-direction: column;
+}
+.image-preview{
+    display:none; 
+    width: 100px;
+     border: 1px solid #ccc;
+}
+#uploadPreview {
+    width: 100px;
+    display: none;
+}
+.upload-container{
+    width: 500px;
+    display: flex;
 
     
+}
+.input-container{
+    width: 200px;
+    height: 300px;
+    border: solid black 2px;
+}
+.submit-container{
+    width: 200px;
+    height: 300px;
+    border: solid black 2px;
+}
+#url {
+    width: 200px;
+    height: 50px;
+}
+#uploadButton {
+    width: 200px;
+    height: 50px;
+}
+#add {
+    width: 200px;
+    height: 50px;
+}
+#no {
+    width: 200px;
+    height: 50px;
 }
