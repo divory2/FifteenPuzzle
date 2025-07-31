@@ -1,8 +1,9 @@
 <?php
+session_start();
 ob_start();  // Start output buffering
 
  $isvalid = true;
- $isRgisterd = false;
+ 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $player = $_POST['Player'];
     $password = $_POST['password'];
@@ -70,7 +71,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 //$alter2 = "ALTER TABLE PLAYER MODIFY logout_date DATE DEFAULT NULL";
 
 
-$isplayer = "SELECT player, player_password FROM PLAYER WHERE player = '$player'";
+$isplayer = "SELECT player, player_password, player_role FROM PLAYER WHERE player = '$player'";
 $result = $conn->query($isplayer);
 
 if ($result) {
@@ -83,9 +84,13 @@ if ($result) {
 
         if ($row && $row["player"] == $player) {
             if (password_verify($password, $row["player_password"])) {
+                $_SESSION["player"] = $player;
+                 $_SESSION["role"] = $row["player_role"];
+                 $_SESSION["gameStart"] = "true";
                 echo"password is correct";
-                header("Location: game.html");
+                header("Location: game.php?player=" . urlencode($player) . "&role=" . urlencode($row["player_role"]));
                 exit();
+
             } else {
                 header("Location: login.html?error=password_incorrect");
                 exit();
