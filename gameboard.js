@@ -119,8 +119,9 @@ window.onload = function() {
         const row = Math.floor((tileNum - 1) / size);
         const col = (tileNum - 1) % size;
       
-        // backgroundSize 400% means each tile is 1/4th of the image
-        return `${col * 25}% ${row * 25}%`;
+        // backgroundSize 400% means we need to position at 0%, 33.333%, 66.666%, 100%
+        const positions = [0, 33.333, 66.666, 100];
+        return `${positions[col]}% ${positions[row]}%`;
       }
       function shuffleTiles() {
         // Fisher-Yates shuffle for array

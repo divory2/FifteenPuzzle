@@ -216,39 +216,44 @@ body{
 
 /* common tile styling */
 .tile {
-    width: 100%;
-    height: 100%;
-    background-repeat: no-repeat;
-    background-size: 400% 400%;
-    border: 1px solid white;
-    box-sizing: border-box;
-    cursor: pointer;
-  }
-  
-  .tile1  { background-position:   0%       0%; }
-  .tile2  { background-position:  33.333%  0%; }
-  .tile3  { background-position:  66.666%  0%; }
-  .tile4  { background-position:  100%     0%; }
-  
-  .tile5  { background-position:   0%      33.333%; }
-  .tile6  { background-position:  33.333% 33.333%; }
-  .tile7  { background-position:  66.666% 33.333%; }
-  .tile8  { background-position:  100%    33.333%; }
-  
-  .tile9  { background-position:   0%      66.666%; }
-  .tile10 { background-position:  33.333% 66.666%; }
-  .tile11 { background-position:  66.666% 66.666%; }
-  .tile12 { background-position:  100%    66.666%; }
-  
-  .tile13 { background-position:   0%      100%; }
-  .tile14 { background-position:  33.333% 100%; }
-  .tile15 { background-position:  66.666% 100%; }
-  
-  .empty { 
-    background: white; 
-    cursor: default; 
-  }
-  
+  width: 100%;
+  height: 100%;
+  background-repeat: no-repeat;
+  background-size: 400% 400%;
+  border: 1px solid white;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+
+/* Row 1 */
+.tile1  { background-position:   0%   0%; }
+.tile2  { background-position:  24%   0%; }
+.tile3  { background-position:  49%   0%; }
+.tile4  { background-position:  74%   0%; }
+
+/* Row 2 */
+.tile5  { background-position:   0%  24%; }
+.tile6  { background-position:  24%  24%; }
+.tile7  { background-position:  49%  24%; }
+.tile8  { background-position:  74%  24%; }
+
+/* Row 3 */
+.tile9  { background-position:   0%  49%; }
+.tile10 { background-position:  24%  49%; }
+.tile11 { background-position:  49%  49%; }
+.tile12 { background-position:  74%  49%; }
+
+/* Row 4 */
+.tile13 { background-position:   0%  74%; }
+.tile14 { background-position:  24%  74%; }
+.tile15 { background-position:  49%  74%; }
+
+/* The empty tile */
+.empty {
+  background: white;
+  cursor: default;
+}
+
   
   
   #stats {

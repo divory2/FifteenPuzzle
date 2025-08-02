@@ -486,12 +486,12 @@ $userImages = getUserImages($conn, $playerId);
                         <div id="uploadForm" class="upload-form">
                             <div class="input-group">
                                 <label for="imageUrl">Image URL:</label>
-                                <input type="url" id="imageUrl" name="image_url" placeholder="https://example.com/image.jpg" required>
+                                <input type="url" id="imageUrl" name="image_url" placeholder="https://example.com/image.jpg">
                             </div>
                             
                             <div class="input-group">
                                 <label for="imageName">Image Name:</label>
-                                <input type="text" id="imageName" name="image_name" placeholder="Enter a name for this image" required maxlength="50">
+                                <input type="text" id="imageName" name="image_name" placeholder="Enter a name for this image" maxlength="50">
                             </div>
                             
                             <img id="uploadPreview" class="image-preview" src="" alt="Upload preview" style="display: none;">
@@ -656,6 +656,50 @@ $userImages = getUserImages($conn, $playerId);
                 setTimeout(() => {
                     uploadError.style.display = 'none';
                 }, 5000);
+            }
+            
+            // Handle form submission - manage required fields dynamically
+            const gameForm = document.getElementById('gameForm');
+            if (gameForm) {
+                gameForm.addEventListener('submit', function(e) {
+                    const submitter = e.submitter;
+                    const imageUrlInput = document.getElementById('imageUrl');
+                    const imageNameInput = document.getElementById('imageName');
+                    
+                    if (submitter && submitter.id === 'uploadImageBtn') {
+                        // If uploading, make fields required
+                        imageUrlInput.setAttribute('required', 'required');
+                        imageNameInput.setAttribute('required', 'required');
+                    } else {
+                        // If starting game, remove required attributes
+                        imageUrlInput.removeAttribute('required');
+                        imageNameInput.removeAttribute('required');
+                    }
+                });
+            }
+            
+            // Also handle the upload button click to set required attributes
+            const uploadBtn = document.getElementById('uploadImageBtn');
+            if (uploadBtn) {
+                uploadBtn.addEventListener('click', function() {
+                    const imageUrlInput = document.getElementById('imageUrl');
+                    const imageNameInput = document.getElementById('imageName');
+                    
+                    // Validate manually since we removed required attribute
+                    if (!imageUrlInput.value.trim()) {
+                        imageUrlInput.focus();
+                        showUploadError('Image URL is required');
+                        return;
+                    }
+                    
+                    if (!imageNameInput.value.trim()) {
+                        imageNameInput.focus();
+                        showUploadError('Image name is required');
+                        return;
+                    }
+                    
+                    // If validation passes, proceed with existing upload logic
+                });
             }
         });
     </script>
