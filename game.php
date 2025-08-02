@@ -49,6 +49,14 @@
     </div>
   </div>
 
+
+  <div id="stats">
+        <span id="timer">Time: 0s</span>
+        &nbsp;|&nbsp;
+        <span id="moveCounter">Moves: 0</span>
+</div>
+
+
   <div class="game-container">
     <div id="gameBoard"></div>
   </div>
