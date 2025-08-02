@@ -159,8 +159,25 @@ window.onload = function() {
       
       
   
-    function clickTile(row, col) {
-      console.log(`Tile clicked at row ${row}, col ${col}`);
-    }
+      function tryMoveTile(idx) {
+        const emptyIndex = tiles.indexOf(null);
+        const size = 4;
+      
+        const emptyRow = Math.floor(emptyIndex / size);
+        const emptyCol = emptyIndex % size;
+        const clickedRow = Math.floor(idx / size);
+        const clickedCol = idx % size;
+      
+        const isAdjacent =
+          (clickedRow === emptyRow && Math.abs(clickedCol - emptyCol) === 1) ||
+          (clickedCol === emptyCol && Math.abs(clickedRow - emptyRow) === 1);
+      
+        if (isAdjacent) {
+          // swap tiles
+          [tiles[idx], tiles[emptyIndex]] = [tiles[emptyIndex], tiles[idx]];
+          buildBoard();
+        }
+      }
+      
   };
   
