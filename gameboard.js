@@ -70,31 +70,24 @@ window.onload = function() {
     };
   
     function buildBoard(size) {
-      const gameBoard = document.getElementById('gameBoard');
-      gameBoard.innerHTML = ''; // clear old board
-  
-      const tileSizePercent = 100 / size;
-      gameBoard.style.display = 'flex';
-      gameBoard.style.flexWrap = 'wrap';
-  
-      for (let row = 0; row < size; row++) {
-        for (let col = 0; col < size; col++) {
+        const gameBoard = document.getElementById('gameBoard');
+        gameBoard.innerHTML = '';
+      
+        for (let i = 0; i < size * size; i++) {
+          const tileNum = i + 1;
           const tile = document.createElement('div');
-          tile.className = `tile tile${row * size + col + 1}`;
-          tile.style.width = tileSizePercent + '%';
-          tile.style.height = tileSizePercent + '%';
-          tile.style.backgroundImage = `url('${selectedBackgroundUrl}')`;
-          tile.style.backgroundSize = `${size * 100}% ${size * 100}%`;
-          tile.style.backgroundPosition = `-${col * 100 / (size - 1)}% -${row * 100 / (size - 1)}%`;
-          tile.style.border = '1px solid black';
-          tile.style.boxSizing = 'border-box';
-          tile.style.cursor = 'pointer';
-  
-          tile.addEventListener('click', () => clickTile(row, col));
+          tile.className = `tile tile${tileNum}`;
+      
+          if (tileNum !== 16) {
+            tile.style.backgroundImage = `url('${selectedBackgroundUrl}')`;
+          }
+      
+          tile.addEventListener('click', () => clickTile(tileNum));
           gameBoard.appendChild(tile);
         }
       }
-    }
+      
+      
   
     function clickTile(row, col) {
       console.log(`Tile clicked at row ${row}, col ${col}`);
