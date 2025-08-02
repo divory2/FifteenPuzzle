@@ -151,6 +151,16 @@ window.onload = function() {
         }
       }
       
+      function checkIfSolved() {
+        // last tile should be null
+        for (let i = 0; i < tiles.length - 1; i++) {
+          if (tiles[i] !== i + 1) return false;
+        }
+        if (tiles[tiles.length - 1] !== null) return false;
+      
+        alert('🎉 Puzzle solved!');
+        return true;
+      }
       
       
 
@@ -176,6 +186,7 @@ window.onload = function() {
           // swap tiles
           [tiles[idx], tiles[emptyIndex]] = [tiles[emptyIndex], tiles[idx]];
           buildBoard();
+          checkIfSolved();
         }
       }
       
