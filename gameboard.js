@@ -5,9 +5,12 @@ window.onload = function() {
     const previewUpload = document.getElementById('uploadedPreview');
     const addBtn = document.getElementById('add');
     const noBtn = document.getElementById('no');
-  
+    let timerInterval = null;
+    let timeElapsed = 0;
     let selectedBackgroundUrl = '';
     let tiles = []; 
+    let moveCount = 0;
+
     selector.addEventListener('change', function() {
       const selectedImage = this.value;
       if (selectedImage) {
@@ -44,6 +47,15 @@ window.onload = function() {
         initTiles();
         shuffleTiles();
         buildBoard();
+        // Reset & start timer
+        moveCount = 0;
+        timeElapsed = 0;
+        updateTimerDisplay();
+        if (timerInterval) clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+            timeElapsed++;
+            updateTimerDisplay();
+        }, 1000);
         
       }
       else if (submittedButton && submittedButton.value === "upload") {
@@ -86,6 +98,11 @@ window.onload = function() {
       
 
 
+      function updateTimerDisplay() {
+        const timerElement = document.getElementById('timer');
+        timerElement.textContent = `Time: ${timeElapsed}s`;
+      }
+      
 
     function buildBoard() {
         gameBoard.innerHTML = '';
@@ -153,14 +170,13 @@ window.onload = function() {
       }
       
       function checkIfSolved() {
-        // last tile should be null
-        for (let i = 0; i < tiles.length - 1; i++) {
-          if (tiles[i] !== i + 1) return false;
+        for (let i = 0; i < 15; i++) {
+          if (tiles[i] !== i + 1) return;
         }
-        if (tiles[tiles.length - 1] !== null) return false;
-      
-        alert('🎉 Puzzle solved!');
-        return true;
+        if (tiles[15] === null) {
+          clearInterval(timerInterval); // stop timer
+          alert(`🎉 You solved the puzzle in ${timeElapsed} seconds!`);
+        }
       }
       
       
@@ -233,6 +249,12 @@ function startDrag(e, idx) {
 
 }
 
+function updateMoveCounter() {
+    const moveCounterElement = document.getElementById('moveCounter');
+    moveCounterElement.textContent = `Moves: ${moveCount}`;
+  }
+  
+
 
 
 
@@ -261,6 +283,8 @@ function trySlide(idx, direction) {
   
     if (targetIdx !== -1) {
       [tiles[idx], tiles[emptyIndex]] = [tiles[emptyIndex], tiles[idx]];
+      moveCount++;
+        updateMoveCounter();
       buildBoard();
       checkIfSolved();
     }
