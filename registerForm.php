@@ -1,37 +1,19 @@
 <?php
-
-
+require_once 'db_config.php';
 
 if($_SERVER["REQUEST_METHOD"] == "POST"){
-
-
-
     $player = $_POST['Player'];
-    $password = $_POST['password'];    
-    $host = "localhost";
-    $user = "divory2";
-    $pass = "divory2";
-    $dbname = "divory2";
+    $password = $_POST['password'];
     
-    // Create connection
-    $conn = new mysqli($host, $user, $pass, $dbname);
-    
-    // Check connection
-    if ($conn->connect_error) {
-        echo "Could not connect to server\n";
-        die("Connection failed: " . $conn->connect_error);
-    }
+    try {
+        $conn = getDBConnection();
+        
+        //check to see if player is already a registered
+        $stmt = $conn->prepare("SELECT player, player_password FROM PLAYER WHERE player = ?");
+        $stmt->bind_param("s", $player);
+        $stmt->execute();
+        $result = $stmt->get_result();
 
-
-
-
-    //check to see if player is already a registered
-    $stmt = $conn->prepare("SELECT player, player_password FROM PLAYER WHERE player = ?");
-    $stmt->bind_param("s", $player);
-    $stmt->execute();
-    $result = $stmt->get_result();
-
-    if ($result) {
         if ($result->num_rows > 0) {
             echo"query for player if player exists <br>";
             // Loop through results (should really be only 1 if player names are unique)
@@ -80,14 +62,12 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
        } else {
            echo "Error: " . $stmt->error;
        }
-
-        
         }
-    } else {
-       echo "Error running query: " . $conn->error;
+        
+    } catch (Exception $e) {
+        error_log("Registration error: " . $e->getMessage());
+        header("Location: login.php?error=database_error");
+        exit();
     }
-    
-
-    return $isvalid;
 }
 ?>
