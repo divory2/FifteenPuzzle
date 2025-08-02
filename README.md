@@ -90,7 +90,6 @@ A comprehensive web-based implementation of the classic Fifteen Puzzle game with
 ```
 FifteenPuzzle/
 ├── index.php                 # Project portal (main landing page)
-├── index.html               # Static version of landing page
 ├── index-styles.css         # Styles for landing page
 ├── login.php                # Login/register interface
 ├── game.php                 # Main game interface
