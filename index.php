@@ -125,12 +125,12 @@ if (isset($_SESSION['player'])) {
             <div class="team-members">
                 <div class="member">
                     <h4>Vignesh</h4>
-                    <p>Lead Developer</p>
+                    <p>Developer</p>
                     <p>Backend & Database</p>
                 </div>
                 <div class="member">
                     <h4>Devon</h4>
-                    <p>Frontend Developer</p>
+                    <p>Developer</p>
                     <p>UI/UX & Game Logic</p>
                 </div>
             </div>

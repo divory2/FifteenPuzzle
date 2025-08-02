@@ -20,8 +20,8 @@ A comprehensive web-based implementation of the classic Fifteen Puzzle game with
 
 ## 👥 Team
 
-- **Vignesh A M Raja** - Lead Developer (Backend & Database)
-- **Devon Ivory** - Frontend Developer (UI/UX & Game Logic)
+- **Vignesh A M Raja** - Developer (Backend & Database)
+- **Devon Ivory** - Developer (UI/UX & Game Logic)
 
 ## 🔑 Test Accounts
 
