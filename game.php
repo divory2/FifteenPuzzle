@@ -56,16 +56,6 @@ if (!isset($_SESSION['player'])) {
     </div>
   </div>
 
-  <!-- Admin Panel (only visible to admins) -->
-  <div id="adminPanel" class="admin-panel" style="display: none;">
-    <h3>Admin Panel</h3>
-    <div class="admin-controls">
-      <button id="userManagement" class="admin-only">Manage Users</button>
-      <button id="systemSettings" class="admin-only">System Settings</button>
-      <button id="viewAllGames" class="admin-only">View All Games</button>
-    </div>
-  </div>
-
   <!-- Statistics Panel -->
   <div id="gameStatistics" class="statistics-panel" style="display: none;">
     <h3>Your Game Statistics</h3>
@@ -82,7 +72,6 @@ if (!isset($_SESSION['player'])) {
   </div>
 
   <script src="rbac.js"></script>
-  <script src="admin.js"></script>
   <script src="gameboard.js"></script>
   <script>
     // Initialize RBAC system with user data from PHP session
