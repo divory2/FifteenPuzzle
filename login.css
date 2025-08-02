@@ -208,15 +208,16 @@ body{
     border: 2px solid black;
     margin-top: 20px;
     overflow: hidden;
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+    gap: 1px;
 }
 
 /* common tile styling */
 .tile {
-    display: table-cell;
-    width: 25%;
-    height: 25%;
+    width: 100%;
+    height: 100%;
     background-repeat: no-repeat;
     background-size: 400% 400%;
     border: 1px solid white;
@@ -224,24 +225,24 @@ body{
     cursor: pointer;
   }
   
-  .tile1  { background-position:   0%   0%; }
-  .tile2  { background-position:  25%   0%; }
-  .tile3  { background-position:  50%   0%; }
-  .tile4  { background-position:  75%   0%; }
+  .tile1  { background-position:   0%       0%; }
+  .tile2  { background-position:  33.333%  0%; }
+  .tile3  { background-position:  66.666%  0%; }
+  .tile4  { background-position:  100%     0%; }
   
-  .tile5  { background-position:   0%  25%; }
-  .tile6  { background-position:  25%  25%; }
-  .tile7  { background-position:  50%  25%; }
-  .tile8  { background-position:  75%  25%; }
+  .tile5  { background-position:   0%      33.333%; }
+  .tile6  { background-position:  33.333% 33.333%; }
+  .tile7  { background-position:  66.666% 33.333%; }
+  .tile8  { background-position:  100%    33.333%; }
   
-  .tile9  { background-position:   0%  50%; }
-  .tile10 { background-position:  25%  50%; }
-  .tile11 { background-position:  50%  50%; }
-  .tile12 { background-position:  75%  50%; }
+  .tile9  { background-position:   0%      66.666%; }
+  .tile10 { background-position:  33.333% 66.666%; }
+  .tile11 { background-position:  66.666% 66.666%; }
+  .tile12 { background-position:  100%    66.666%; }
   
-  .tile13 { background-position:   0%  75%; }
-  .tile14 { background-position:  25%  75%; }
-  .tile15 { background-position:  50%  75%; }
+  .tile13 { background-position:   0%      100%; }
+  .tile14 { background-position:  33.333% 100%; }
+  .tile15 { background-position:  66.666% 100%; }
   
   .empty { 
     background: white; 
