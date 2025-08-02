@@ -121,47 +121,62 @@ window.onload = function() {
     function updateTileContent(tile, position) {
         const tileNumber = puzzleState[position];
         
+        // Clear any existing event listeners by cloning the tile
+        const newTile = tile.cloneNode(false);
+        tile.parentNode.replaceChild(newTile, tile);
+        tiles[position] = newTile;
+        
         if (tileNumber === 15) {
             // Empty tile
-            tile.classList.add('empty');
-            tile.classList.remove('game-tile');
-            tile.style.backgroundImage = '';
-            tile.innerHTML = '';
-            tile.style.cursor = 'default';
-            tile.onclick = null;
+            newTile.classList.add('empty');
+            newTile.classList.remove('game-tile');
+            newTile.style.backgroundImage = '';
+            newTile.innerHTML = '';
+            newTile.style.cursor = 'default';
+            newTile.draggable = false;
         } else {
             // Regular tile
-            tile.classList.remove('empty');
-            tile.classList.add('game-tile');
-            tile.style.backgroundImage = `url('${selectedBackgroundUrl}')`;
-            tile.style.cursor = 'pointer';
+            newTile.classList.remove('empty');
+            newTile.classList.add('game-tile');
+            newTile.style.backgroundImage = `url('${selectedBackgroundUrl}')`;
+            newTile.style.cursor = 'pointer';
             
             // Calculate background position for this tile
+            // Each tile shows 1/4 of the total image
             const row = Math.floor(tileNumber / 4);
             const col = tileNumber % 4;
-            const bgX = -(col * 25); // 25% per column (100% / 4 columns)
-            const bgY = -(row * 25); // 25% per row (100% / 4 rows)
             
-            tile.style.backgroundPosition = `${bgX}% ${bgY}%`;
-            tile.style.backgroundSize = '400% 400%';
+            // Calculate the background position as percentage
+            // For a 4x4 grid: 0%, 33.33%, 66.67%, 100% positions
+            const bgX = (col / 3) * 100; // 0, 33.33, 66.67 for cols 0,1,2,3
+            const bgY = (row / 3) * 100; // 0, 33.33, 66.67 for rows 0,1,2,3
             
-            // Add tile number for clarity
-            tile.innerHTML = `<div class="tile-number">${tileNumber + 1}</div>`;
+            newTile.style.backgroundPosition = `${bgX}% ${bgY}%`;
+            newTile.style.backgroundSize = '400% 400%';
+            
+            // Debug logging for tile positioning
+            console.log(`🎯 Tile ${tileNumber + 1}: row=${row}, col=${col}, bgPos=${bgX}%,${bgY}%`);
+            
+            // Add tile number for clarity with better styling
+            newTile.innerHTML = `<div class="tile-number">${tileNumber + 1}</div>`;
             
             // Add click handler
-            tile.onclick = () => handleTileClick(position);
+            newTile.onclick = () => handleTileClick(position);
             
             // Add drag handlers
-            tile.draggable = true;
-            tile.addEventListener('dragstart', (e) => handleDragStart(e, position));
-            tile.addEventListener('dragover', handleDragOver);
-            tile.addEventListener('drop', (e) => handleDrop(e, position));
+            newTile.draggable = true;
+            newTile.addEventListener('dragstart', (e) => handleDragStart(e, position));
+            newTile.addEventListener('dragover', handleDragOver);
+            newTile.addEventListener('drop', (e) => handleDrop(e, position));
         }
     }
 
     function shufflePuzzle() {
         // Start with solved state
         puzzleState = Array.from({length: 16}, (_, i) => i);
+        
+        // Make puzzleState globally accessible for debugging
+        window.puzzleState = puzzleState;
         
         // Perform 1000 random valid moves to ensure solvability
         for (let i = 0; i < 1000; i++) {
@@ -181,6 +196,8 @@ window.onload = function() {
         }
         
         console.log('🔀 Puzzle shuffled:', puzzleState);
+        console.log('🎮 Game ready! Tiles should now display correctly.');
+        console.log('🔧 Type debugTiles() in console to see current arrangement');
     }
 
     function getAdjacentPositions(pos) {

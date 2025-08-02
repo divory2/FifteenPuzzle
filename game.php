@@ -324,14 +324,16 @@ $userImages = getUserImages($conn, $playerId);
             position: absolute;
             top: 5px;
             left: 5px;
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(0, 0, 0, 0.8);
             color: white;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 14px;
             font-weight: bold;
             z-index: 10;
             pointer-events: none;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.3);
         }
         
         @keyframes tileMove {
@@ -377,6 +379,17 @@ $userImages = getUserImages($conn, $playerId);
             transform: none;
             border-color: rgba(255,255,255,0.2);
             box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
+        }
+        
+        .tile.game-tile {
+            background-repeat: no-repeat;
+            background-size: 400% 400%;
+        }
+        
+        .tile.game-tile:hover {
+            border-color: #3498db;
+            transform: scale(1.02);
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
         }
         
         .game-actions {
@@ -666,6 +679,24 @@ $userImages = getUserImages($conn, $playerId);
                             <small>Top row: 1, 2, 3, 4 | Second row: 5, 6, 7, 8 | etc.</small>
                         </div>
                     `;
+                }
+            };
+            
+            // Debug function to show current tile arrangement
+            window.debugTiles = function() {
+                if (typeof window.puzzleState !== 'undefined') {
+                    console.log('🔍 Current puzzle state:');
+                    for (let row = 0; row < 4; row++) {
+                        const rowTiles = [];
+                        for (let col = 0; col < 4; col++) {
+                            const pos = row * 4 + col;
+                            const tileNum = window.puzzleState[pos];
+                            rowTiles.push(tileNum === 15 ? '  ' : (tileNum + 1).toString().padStart(2));
+                        }
+                        console.log(`Row ${row + 1}: [${rowTiles.join('] [')}]`);
+                    }
+                } else {
+                    console.log('❌ Game not started yet');
                 }
             };
             
