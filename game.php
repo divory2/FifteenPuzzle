@@ -542,11 +542,24 @@ $userImages = getUserImages($conn, $playerId);
             const userRole = '<?php echo $_SESSION['role'] ?? 'player'; ?>';
             const userName = '<?php echo htmlspecialchars($_SESSION['player']); ?>';
             
+            // Debug logging
+            console.log('Session data from PHP:');
+            console.log('Role:', userRole);
+            console.log('Username:', userName);
+            console.log('PHP Session player:', '<?php echo isset($_SESSION['player']) ? $_SESSION['player'] : 'NOT SET'; ?>');
+            console.log('PHP Session role:', '<?php echo isset($_SESSION['role']) ? $_SESSION['role'] : 'NOT SET'; ?>');
+            
             // Initialize RBAC
             if (typeof RBAC !== 'undefined') {
                 RBAC.init(userRole, userName);
                 // Apply role-based UI changes
                 RBAC.applyRoleBasedUI();
+                
+                // Test permission check
+                console.log('Testing play_game permission:', RBAC.hasPermission('play_game'));
+                console.log('Current user info:', RBAC.getCurrentUser());
+            } else {
+                console.error('RBAC is not defined!');
             }
             
             // Image upload functionality

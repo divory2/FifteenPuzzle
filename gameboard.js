@@ -29,15 +29,26 @@ window.onload = function() {
         event.preventDefault();
         const submittedButton = event.submitter;
         
+        console.log('startGame called, submittedButton:', submittedButton);
+        console.log('submittedButton.value:', submittedButton ? submittedButton.value : 'undefined');
+        
         if (submittedButton && submittedButton.value === "start") {
             // Check permission before starting game - both admins and players can play
             if (typeof RBAC !== 'undefined') {
+                console.log('RBAC is available, checking permissions...');
+                console.log('Current user role before permission check:', RBAC.getCurrentUser().role);
+                console.log('Has play_game permission:', RBAC.hasPermission('play_game'));
+                
                 RBAC.executeWithPermission('play_game', function() {
+                    console.log('Permission granted, starting game...');
                     startGameLogic();
                 }, "You need to be logged in as a player or admin to start the game");
             } else {
+                console.log('RBAC not available, starting game directly...');
                 startGameLogic();
             }
+        } else {
+            console.log('Not a start game submission');
         }
     };
     
