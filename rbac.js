@@ -62,6 +62,7 @@ function hasPermission(permission) {
     
     const hasAccess = roles[currentUserRole].includes(permission);
     console.log(`Permission check: ${permission} for role ${currentUserRole} = ${hasAccess}`);
+    console.log(`Available permissions for ${currentUserRole}:`, roles[currentUserRole]);
     return hasAccess;
 }
 
@@ -189,23 +190,48 @@ function executeWithPermission(permission, callback, errorMessage = 'Access deni
     if (hasPermission(permission)) {
         callback();
     } else {
-        alert(errorMessage + `. Required role: ${getRequiredRoleForPermission(permission)}`);
-        console.warn(`Permission denied: ${permission} for role ${currentUserRole}`);
+        const requiredRole = getRequiredRoleForPermission(permission);
+        const rolesWithPermission = [];
+        
+        for (const [role, permissions] of Object.entries(roles)) {
+            if (permissions.includes(permission)) {
+                rolesWithPermission.push(role);
+            }
+        }
+        
+        const rolesList = rolesWithPermission.join(' or ');
+        alert(errorMessage + `. You need to be logged in as: ${rolesList}. Your current role: ${currentUserRole}`);
+        console.warn(`Permission denied: ${permission} for role ${currentUserRole}. Required: ${rolesList}`);
     }
 }
 
 /**
  * Get the minimum role required for a permission
  * @param {string} permission - Permission to check
- * @returns {string} - Required role
+ * @returns {string} - Required role(s)
  */
 function getRequiredRoleForPermission(permission) {
+    const roleHierarchy = ['guest', 'player', 'admin'];
+    const rolesWithPermission = [];
+    
     for (const [role, permissions] of Object.entries(roles)) {
         if (permissions.includes(permission)) {
+            rolesWithPermission.push(role);
+        }
+    }
+    
+    if (rolesWithPermission.length === 0) {
+        return 'unknown';
+    }
+    
+    // Return the lowest level role that has this permission
+    for (const role of roleHierarchy) {
+        if (rolesWithPermission.includes(role)) {
             return role;
         }
     }
-    return 'unknown';
+    
+    return rolesWithPermission[0];
 }
 
 /**
