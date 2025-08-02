@@ -1,91 +1,128 @@
 <?php
 session_start();
-ob_start();  // Start output buffering
 require_once 'db_config.php';
 
-$isvalid = true;
- 
+// Enable error reporting for development (remove in production)
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+/**
+ * Secure login form processing with improved error handling
+ */
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $player = $_POST['Player'];
-    $password = $_POST['password'];
-   
+    // Sanitize and validate input
+    $player = trim($_POST['Player'] ?? '');
+    $password = $_POST['password'] ?? '';
+    
+    // Input validation
+    if (empty($player) || empty($password)) {
+        header("Location: login.php?error=missing_credentials");
+        exit();
+    }
+    
+    if (strlen($player) > 30) {
+        header("Location: login.php?error=username_too_long");
+        exit();
+    }
+    
     try {
         $conn = getDBConnection();
         
-        // Create table if it doesn't exist
-        $sql = "CREATE TABLE IF NOT EXISTS PLAYER (
+        // Ensure PLAYER table exists with proper structure
+        $createTableSQL = "CREATE TABLE IF NOT EXISTS PLAYER (
             id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-            player VARCHAR(30) NOT NULL,
+            player VARCHAR(30) NOT NULL UNIQUE,
             player_password VARCHAR(255) NOT NULL,
-            player_role VARCHAR(10) NOT NULL,
-            login_date DATE DEFAULT NULL,
-            logout_date DATE DEFAULT NULL
+            player_role ENUM('player', 'admin') NOT NULL DEFAULT 'player',
+            login_date TIMESTAMP NULL DEFAULT NULL,
+            logout_date TIMESTAMP NULL DEFAULT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            INDEX idx_player (player),
+            INDEX idx_role (player_role)
         )";
         
-        if ($conn->query($sql) === TRUE) {
-            //echo "Table Player created successfully\n";
-        } else {
-           // echo "Error creating table: " . $conn->error . "\n";
+        if (!$conn->query($createTableSQL)) {
+            error_log("Error creating PLAYER table: " . $conn->error);
+            header("Location: login.php?error=database_error");
+            exit();
         }
 
-        $currentTime = date("Y-m-d H:i:s");
-        $stmt = $conn->prepare("SELECT player, player_password, player_role, id FROM PLAYER WHERE player = ?");
+        // Prepare secure query to fetch user data
+        $stmt = $conn->prepare("SELECT id, player, player_password, player_role FROM PLAYER WHERE player = ? LIMIT 1");
+        if (!$stmt) {
+            error_log("Prepare failed: " . $conn->error);
+            header("Location: login.php?error=database_error");
+            exit();
+        }
+        
         $stmt->bind_param("s", $player);
         $stmt->execute();
         $result = $stmt->get_result();
 
-if ($result) {
-    if ($result->num_rows > 0) {
-        echo"query for player if player exists <br>";
-        // Loop through results (should really be only 1 if player names are unique)
-        $row = $result->fetch_assoc();
-        echo"Player name". $row["player"];
-        echo "Player name from user: $player";
-
-        if ($row && $row["player"] == $player) {
+        if ($result->num_rows === 1) {
+            $row = $result->fetch_assoc();
+            
+            // Verify password
             if (password_verify($password, $row["player_password"])) {
-                $_SESSION["player"] = $player;
-                 $_SESSION["role"] = $row["player_role"];
-                 $_SESSION["gameStart"] = "true";
-                 $_SESSION["playerId"] = $row["id"];
-                 // query to update login date
-                //  $loginTime = "UPDATE PLAYER SET login_date = '$currentTime' WHERE id = '{$_SESSION["playerId"]}'";
-                // // if($conn->query($loginTime) === TRUE) {
-                    
-                // // }else{
-                // //     echo "Error running query: " . $conn->error;
-                // // }
-                echo"password is correct";
-                header("Location: game.php?player=" . urlencode($player) . "&role=" . urlencode($row["player_role"]));
+                // Successful login - regenerate session ID for security
+                session_regenerate_id(true);
+                
+                // Set session variables
+                $_SESSION["player"] = $row["player"];
+                $_SESSION["role"] = $row["player_role"];
+                $_SESSION["playerId"] = $row["id"];
+                $_SESSION["gameStart"] = "true";
+                $_SESSION["login_time"] = time();
+                
+                // Update login timestamp
+                $updateLoginStmt = $conn->prepare("UPDATE PLAYER SET login_date = CURRENT_TIMESTAMP WHERE id = ?");
+                if ($updateLoginStmt) {
+                    $updateLoginStmt->bind_param("i", $row["id"]);
+                    $updateLoginStmt->execute();
+                    $updateLoginStmt->close();
+                }
+                
+                // Log successful login
+                error_log("Successful login for user: " . $player . " with role: " . $row["player_role"]);
+                
+                // Redirect based on role
+                if ($row["player_role"] === 'admin') {
+                    header("Location: admin.php");
+                } else {
+                    header("Location: game.php");
+                }
                 exit();
-
+                
             } else {
-                header("Location: login.php?error=password_incorrect");
+                // Invalid password
+                error_log("Failed login attempt for user: " . $player . " - incorrect password");
+                header("Location: login.php?error=invalid_credentials");
                 exit();
             }
-        }
-        else{
-            header("Location: login.php?error=Wrong_player_name");
+            
+        } else {
+            // User not found
+            error_log("Failed login attempt for non-existent user: " . $player);
+            header("Location: login.php?error=invalid_credentials");
             exit();
         }
         
- } else {
-        // No player found
-       // echo "Player not found";
-        header("Location: login.php?error=player_not_registered");
-        exit();
-    }
-        } else {
-            echo "Error running query: " . $conn->error;
-        }
+        $stmt->close();
         
     } catch (Exception $e) {
         error_log("Login error: " . $e->getMessage());
-        header("Location: login.php?error=database_error");
+        header("Location: login.php?error=system_error");
         exit();
+    } finally {
+        if (isset($conn)) {
+            $conn->close();
+        }
     }
-
-    $conn->close();
+} else {
+    // Not a POST request
+    header("Location: login.php?error=invalid_request");
+    exit();
 }
-ob_end_flush(); // Flush output at the end
 ?>
