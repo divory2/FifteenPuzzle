@@ -51,20 +51,19 @@ window.onload = function() {
             return;
           }
 
-
-        initTiles();
-        shuffleTiles();
-        buildBoard();
-        // Reset & start timer
-        moveCount = 0;
-        timeElapsed = 0;
-        updateTimerDisplay();
-        if (timerInterval) clearInterval(timerInterval);
-        timerInterval = setInterval(() => {
-            timeElapsed++;
-            updateTimerDisplay();
-        }, 1000);
-        
+          initTiles();
+          shuffleTiles();
+          buildBoard();
+          // Reset & start timer
+          moveCount = 0;
+          timeElapsed = 0;
+          updateTimerDisplay();
+          if (timerInterval) clearInterval(timerInterval);
+          timerInterval = setInterval(() => {
+              timeElapsed++;
+              updateTimerDisplay();
+          }, 1000);
+        }, "You need player permissions to start the game");
       }
       else if (submittedButton && submittedButton.value === "upload") {
         // Check permission before uploading
