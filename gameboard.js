@@ -57,8 +57,18 @@ window.onload = function() {
             return false;
         }
         
-        // Start the actual game
-        initializeGame();
+        // Test if image loads before starting game
+        const testImg = new Image();
+        testImg.onload = function() {
+            console.log('✅ Image loaded successfully');
+            initializeGame();
+        };
+        testImg.onerror = function() {
+            console.error('❌ Failed to load image:', selectedBackgroundUrl);
+            alert('Failed to load the selected image. Please choose a different image.');
+        };
+        testImg.src = selectedBackgroundUrl;
+        
         return false;
     };
     
@@ -71,6 +81,16 @@ window.onload = function() {
 
     function initializeGame() {
         console.log('🎯 Initializing game with image:', selectedBackgroundUrl);
+        
+        // Check if gameBoard element exists
+        if (!gameBoard) {
+            gameBoard = document.getElementById('gameBoard');
+            if (!gameBoard) {
+                console.error('❌ Game board element not found!');
+                alert('Game board not found. Please refresh the page.');
+                return;
+            }
+        }
         
         // Reset game state
         gameActive = true;
@@ -95,11 +115,22 @@ window.onload = function() {
         
         // Create the puzzle
         createPuzzleTiles();
+        
+        // Now update the content after tiles are in the DOM
+        for (let position = 0; position < 16; position++) {
+            updateTileContent(tiles[position], position);
+        }
+        
         shufflePuzzle();
         startTimer();
     }
 
     function createPuzzleTiles() {
+        if (!gameBoard) {
+            console.error('❌ Game board element not found!');
+            return;
+        }
+        
         gameBoard.innerHTML = '';
         tiles = [];
         
@@ -112,34 +143,46 @@ window.onload = function() {
             tile.className = 'tile';
             tile.dataset.position = position;
             
-            updateTileContent(tile, position);
             gameBoard.appendChild(tile);
             tiles.push(tile);
         }
+        
+        console.log('✅ Created 16 tiles successfully');
     }
     
     function updateTileContent(tile, position) {
         const tileNumber = puzzleState[position];
         
-        // Clear any existing event listeners by cloning the tile
-        const newTile = tile.cloneNode(false);
-        tile.parentNode.replaceChild(newTile, tile);
-        tiles[position] = newTile;
+        // Clear existing content and event listeners
+        tile.onclick = null;
+        tile.ondragstart = null;
+        tile.ondragover = null;
+        tile.ondrop = null;
+        tile.draggable = false;
+        
+        // Remove existing event listeners by cloning (only if tile has parent)
+        let workingTile = tile;
+        if (tile.parentNode) {
+            const newTile = tile.cloneNode(false);
+            tile.parentNode.replaceChild(newTile, tile);
+            tiles[position] = newTile;
+            workingTile = newTile;
+        }
         
         if (tileNumber === 15) {
             // Empty tile
-            newTile.classList.add('empty');
-            newTile.classList.remove('game-tile');
-            newTile.style.backgroundImage = '';
-            newTile.innerHTML = '';
-            newTile.style.cursor = 'default';
-            newTile.draggable = false;
+            workingTile.classList.add('empty');
+            workingTile.classList.remove('game-tile');
+            workingTile.style.backgroundImage = '';
+            workingTile.innerHTML = '';
+            workingTile.style.cursor = 'default';
+            workingTile.draggable = false;
         } else {
             // Regular tile
-            newTile.classList.remove('empty');
-            newTile.classList.add('game-tile');
-            newTile.style.backgroundImage = `url('${selectedBackgroundUrl}')`;
-            newTile.style.cursor = 'pointer';
+            workingTile.classList.remove('empty');
+            workingTile.classList.add('game-tile');
+            workingTile.style.backgroundImage = `url('${selectedBackgroundUrl}')`;
+            workingTile.style.cursor = 'pointer';
             
             // Calculate background position for this tile
             // Each tile shows 1/4 of the total image
@@ -151,23 +194,23 @@ window.onload = function() {
             const bgX = (col / 3) * 100; // 0, 33.33, 66.67 for cols 0,1,2,3
             const bgY = (row / 3) * 100; // 0, 33.33, 66.67 for rows 0,1,2,3
             
-            newTile.style.backgroundPosition = `${bgX}% ${bgY}%`;
-            newTile.style.backgroundSize = '400% 400%';
+            workingTile.style.backgroundPosition = `${bgX}% ${bgY}%`;
+            workingTile.style.backgroundSize = '400% 400%';
             
             // Debug logging for tile positioning
             console.log(`🎯 Tile ${tileNumber + 1}: row=${row}, col=${col}, bgPos=${bgX}%,${bgY}%`);
             
             // Add tile number for clarity with better styling
-            newTile.innerHTML = `<div class="tile-number">${tileNumber + 1}</div>`;
+            workingTile.innerHTML = `<div class="tile-number">${tileNumber + 1}</div>`;
             
             // Add click handler
-            newTile.onclick = () => handleTileClick(position);
+            workingTile.onclick = () => handleTileClick(position);
             
             // Add drag handlers
-            newTile.draggable = true;
-            newTile.addEventListener('dragstart', (e) => handleDragStart(e, position));
-            newTile.addEventListener('dragover', handleDragOver);
-            newTile.addEventListener('drop', (e) => handleDrop(e, position));
+            workingTile.draggable = true;
+            workingTile.addEventListener('dragstart', (e) => handleDragStart(e, position));
+            workingTile.addEventListener('dragover', handleDragOver);
+            workingTile.addEventListener('drop', (e) => handleDrop(e, position));
         }
     }
 
