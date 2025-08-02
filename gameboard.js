@@ -99,7 +99,8 @@ window.onload = function() {
             tile.style.backgroundImage = `url('${selectedBackgroundUrl}')`;
             tile.style.backgroundPosition = getBackgroundPosition(tileNum);
           }
-          tile.addEventListener('mousedown', () => tryMoveTile(idx));
+          //tile.addEventListener('mousedown', () => tryMoveTile(idx));
+          tile.addEventListener('mousedown', (e) => startDrag(e, idx));
           gameBoard.appendChild(tile);
         });
       }
@@ -189,6 +190,88 @@ window.onload = function() {
           checkIfSolved();
         }
       }
+
+      let dragging = false;
+        let startX = 0, startY = 0;
+
+function startDrag(e, idx) {
+  dragging = true;
+  startX = e.clientX;
+  startY = e.clientY;
+
+  function onMove(ev) {
+    if (!dragging) return;
+    const dx = ev.clientX - startX;
+    const dy = ev.clientY - startY;
+
+    const threshold = 30; // px to trigger move
+
+    if (Math.abs(dx) > threshold || Math.abs(dy) > threshold) {
+      dragging = false;
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+
+      // decide direction
+      if (Math.abs(dx) > Math.abs(dy)) {
+        if (dx > 0) trySlide(idx, 'right');
+        else trySlide(idx, 'left');
+      } else {
+        if (dy > 0) trySlide(idx, 'down');
+        else trySlide(idx, 'up');
+      }
+    }
+  }
+
+  function onUp() {
+    dragging = false;
+    document.removeEventListener('mousemove', onMove);
+    document.removeEventListener('mouseup', onUp);
+  }
+
+  document.addEventListener('mousemove', onMove);
+  document.addEventListener('mouseup', onUp);
+
+}
+
+
+
+
+function trySlide(idx, direction) {
+    const size = 4;
+    const emptyIndex = tiles.indexOf(null);
+    const clickedRow = Math.floor(idx / size);
+    const clickedCol = idx % size;
+    const emptyRow = Math.floor(emptyIndex / size);
+    const emptyCol = emptyIndex % size;
+  
+    let targetIdx = -1;
+  
+    if (direction === 'left' && clickedCol > 0 && emptyIndex === idx - 1) {
+      targetIdx = idx - 1;
+    }
+    else if (direction === 'right' && clickedCol < size - 1 && emptyIndex === idx + 1) {
+      targetIdx = idx + 1;
+    }
+    else if (direction === 'up' && clickedRow > 0 && emptyIndex === idx - size) {
+      targetIdx = idx - size;
+    }
+    else if (direction === 'down' && clickedRow < size - 1 && emptyIndex === idx + size) {
+      targetIdx = idx + size;
+    }
+  
+    if (targetIdx !== -1) {
+      [tiles[idx], tiles[emptyIndex]] = [tiles[emptyIndex], tiles[idx]];
+      buildBoard();
+      checkIfSolved();
+    }
+  }
+  
+
+
+
+
+
+
       
   };
   
