@@ -86,7 +86,14 @@ window.onload = function() {
 
       function updateTimerDisplay() {
         const timerElement = document.getElementById('timer');
-        timerElement.textContent = `Time: ${timeElapsed}s`;
+        if (timerElement) {
+          timerElement.textContent = `${timeElapsed}s`;
+          // Add a subtle pulse effect for each second
+          timerElement.style.transform = 'scale(1.05)';
+          setTimeout(() => {
+            timerElement.style.transform = 'scale(1)';
+          }, 100);
+        }
       }
       
 
@@ -163,6 +170,12 @@ window.onload = function() {
           gameActive = false;
           clearInterval(timerInterval); // stop timer
           
+          // Add completion animation
+          gameBoard.classList.add('game-completed');
+          setTimeout(() => {
+            gameBoard.classList.remove('game-completed');
+          }, 2000);
+          
           const gameMessage = document.getElementById('gameMessage');
           if (gameMessage) {
             gameMessage.innerHTML = `🎉 <strong>Congratulations!</strong> You solved the puzzle in ${timeElapsed} seconds with ${moveCount} moves!`;
@@ -196,6 +209,17 @@ window.onload = function() {
           (clickedCol === emptyCol && Math.abs(clickedRow - emptyRow) === 1);
       
         if (isAdjacent) {
+          // Add visual feedback for successful move
+          const tiles_elements = gameBoard.children;
+          if (tiles_elements[idx]) {
+            tiles_elements[idx].classList.add('moved');
+            setTimeout(() => {
+              if (tiles_elements[idx]) {
+                tiles_elements[idx].classList.remove('moved');
+              }
+            }, 300);
+          }
+          
           // swap tiles
           [tiles[idx], tiles[emptyIndex]] = [tiles[emptyIndex], tiles[idx]];
           moveCount++;
@@ -212,6 +236,10 @@ function startDrag(e, idx) {
   dragging = true;
   startX = e.clientX;
   startY = e.clientY;
+  
+  // Add visual feedback
+  const tile = e.target;
+  tile.classList.add('dragging');
 
   function onMove(ev) {
     if (!dragging) return;
@@ -222,6 +250,7 @@ function startDrag(e, idx) {
 
     if (Math.abs(dx) > threshold || Math.abs(dy) > threshold) {
       dragging = false;
+      tile.classList.remove('dragging');
       document.removeEventListener('mousemove', onMove);
       document.removeEventListener('mouseup', onUp);
 
@@ -238,6 +267,7 @@ function startDrag(e, idx) {
 
   function onUp() {
     dragging = false;
+    tile.classList.remove('dragging');
     document.removeEventListener('mousemove', onMove);
     document.removeEventListener('mouseup', onUp);
   }
@@ -248,7 +278,14 @@ function startDrag(e, idx) {
 
 function updateMoveCounter() {
     const moveCounterElement = document.getElementById('moveCounter');
-    moveCounterElement.textContent = `Moves: ${moveCount}`;
+    if (moveCounterElement) {
+      moveCounterElement.textContent = `${moveCount}`;
+      // Add a subtle bounce effect for each move
+      moveCounterElement.style.transform = 'scale(1.1)';
+      setTimeout(() => {
+        moveCounterElement.style.transform = 'scale(1)';
+      }, 150);
+    }
   }
   
 
@@ -279,9 +316,20 @@ function trySlide(idx, direction) {
     }
   
     if (targetIdx !== -1) {
+      // Add visual feedback for successful move
+      const tiles_elements = gameBoard.children;
+      if (tiles_elements[idx]) {
+        tiles_elements[idx].classList.add('moved');
+        setTimeout(() => {
+          if (tiles_elements[idx]) {
+            tiles_elements[idx].classList.remove('moved');
+          }
+        }, 300);
+      }
+      
       [tiles[idx], tiles[emptyIndex]] = [tiles[emptyIndex], tiles[idx]];
       moveCount++;
-        updateMoveCounter();
+      updateMoveCounter();
       buildBoard();
       checkIfSolved();
     }

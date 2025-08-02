@@ -239,51 +239,119 @@ $userImages = getUserImages($conn, $playerId);
         }
         
         .stat-item {
-            background: #f8f9fa;
-            padding: 15px 25px;
-            border-radius: 8px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 18px 28px;
+            border-radius: 12px;
             text-align: center;
+            border: 1px solid #dee2e6;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+        
+        .stat-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
         
         .stat-item h4 {
-            margin: 0 0 5px 0;
+            margin: 0 0 8px 0;
             color: #2c3e50;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         
         .stat-value {
-            font-size: 1.5em;
+            font-size: 1.8em;
             font-weight: bold;
             color: #3498db;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease;
         }
         
         #gameBoard {
             display: grid;
-            grid-template-columns: repeat(4, 100px);
-            grid-template-rows: repeat(4, 100px);
-            gap: 2px;
+            grid-template-columns: repeat(4, 120px);
+            grid-template-rows: repeat(4, 120px);
+            gap: 3px;
             justify-content: center;
             margin: 20px auto;
             background: #2c3e50;
-            padding: 10px;
-            border-radius: 10px;
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(44, 62, 80, 0.3);
         }
         
         .tile {
             background-size: 400% 400%;
             border: 2px solid #34495e;
-            border-radius: 4px;
+            border-radius: 8px;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            user-select: none;
         }
         
         .tile:hover {
             border-color: #3498db;
-            transform: scale(1.05);
+            transform: scale(1.02);
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+        }
+        
+        .tile:active {
+            transform: scale(0.98);
+            transition: all 0.1s ease;
+        }
+        
+        .tile.dragging {
+            z-index: 10;
+            transform: rotate(2deg) scale(1.05);
+            box-shadow: 0 8px 25px rgba(52, 152, 219, 0.4);
+            border-color: #3498db;
+        }
+        
+        .tile.moved {
+            animation: tileMove 0.3s ease-out;
+        }
+        
+        @keyframes tileMove {
+            0% { transform: scale(1.1); }
+            50% { transform: scale(0.95) rotate(1deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+        
+        .game-completed {
+            animation: gameWin 2s ease-in-out;
+        }
+        
+        @keyframes gameWin {
+            0% { box-shadow: 0 8px 25px rgba(44, 62, 80, 0.3); }
+            25% { box-shadow: 0 8px 35px rgba(46, 204, 113, 0.6); }
+            50% { box-shadow: 0 8px 45px rgba(241, 196, 15, 0.6); }
+            75% { box-shadow: 0 8px 35px rgba(231, 76, 60, 0.6); }
+            100% { box-shadow: 0 8px 35px rgba(52, 152, 219, 0.6); }
+        }
+        
+        .game-board-container h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            text-align: center;
         }
         
         .tile.empty {
-            background: rgba(255,255,255,0.1);
-            border-color: transparent;
+            background: rgba(255,255,255,0.05);
+            border: 2px dashed rgba(255,255,255,0.2);
+            cursor: default;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
+        }
+        
+        .tile.empty:hover {
+            transform: none;
+            border-color: rgba(255,255,255,0.2);
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
         }
         
         .game-actions {
@@ -324,6 +392,14 @@ $userImages = getUserImages($conn, $playerId);
             display: none;
         }
         
+        @media (max-width: 1024px) and (min-width: 769px) {
+            #gameBoard {
+                grid-template-columns: repeat(4, 110px);
+                grid-template-rows: repeat(4, 110px);
+                gap: 2px;
+            }
+        }
+        
         @media (max-width: 768px) {
             .controls-grid {
                 grid-template-columns: 1fr;
@@ -348,8 +424,10 @@ $userImages = getUserImages($conn, $playerId);
             }
             
             #gameBoard {
-                grid-template-columns: repeat(4, 80px);
-                grid-template-rows: repeat(4, 80px);
+                grid-template-columns: repeat(4, 90px);
+                grid-template-rows: repeat(4, 90px);
+                gap: 2px;
+                padding: 10px;
             }
         }
     </style>
