@@ -26,9 +26,10 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 
 
     //check to see if player is already a registered
-
-    $isplayer = "SELECT player, player_password FROM PLAYER WHERE player = '$player'";
-    $result = $conn->query($isplayer);
+    $stmt = $conn->prepare("SELECT player, player_password FROM PLAYER WHERE player = ?");
+    $stmt->bind_param("s", $player);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
     if ($result) {
         if ($result->num_rows > 0) {
@@ -41,17 +42,17 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
             if ($row && $row["player"] == $player) {
                 if (password_verify($password, $row["player_password"])) {
                     echo"password is correct";
-                    header("Location: login.html?error=registred");
+                    header("Location: login.php?error=registred");
                     exit();
                 } else {
                     //player is in the db wrong password
-                    header("Location: login.html?error=password_incorrect_register");
+                    header("Location: login.php?error=password_incorrect_register");
                     exit();
                 }
             }
             else{
                 // player is in db just not the correct casing for player in db
-                header("Location: login.html?error=wrong_player_casing");
+                header("Location: login.php?error=wrong_player_casing");
                 exit();
             }
             
@@ -62,30 +63,23 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 
        //Inserting data into the table
        $currentTime = date("Y-m-d H:i:s");
- $data = [
-    [$player,password_hash($password, PASSWORD_DEFAULT), "player",$currentTime],
-   
-];
-
-foreach ($data as $user) {
-    $sql = "INSERT INTO PLAYER (player, player_password, player_role,login_date) VALUES ('{$user[0]}', '{$user[1]}', '{$user[2]}', '{$user[3]}')";
-    if ($conn->query($sql) === TRUE) {
-        echo "New record created successfully\n";
-        session_start();
-        $_SESSION["player"] = $player;
-        $_SESSION["role"] = "player";
-        $_SESSION["gameStart"] = "true";
-        
-        // send player name and and role to frontend
-
-        header("Location: game.php?player=" . urlencode($player) . "&role=player");
-        exit();
-
-      
-    } else {
-        echo "Error: " . $sql . "\n" . $conn->error . "\n";
-    }
-}
+       $stmt = $conn->prepare("INSERT INTO PLAYER (player, player_password, player_role, login_date) VALUES (?, ?, ?, ?)");
+       $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+       $role = "player";
+       $stmt->bind_param("ssss", $player, $hashedPassword, $role, $currentTime);
+       
+       if ($stmt->execute()) {
+           session_start();
+           $_SESSION["player"] = $player;
+           $_SESSION["role"] = "player";
+           $_SESSION["gameStart"] = "true";
+           $_SESSION["playerId"] = $conn->insert_id;
+           
+           header("Location: game.php?player=" . urlencode($player) . "&role=player");
+           exit();
+       } else {
+           echo "Error: " . $stmt->error;
+       }
 
         
         }

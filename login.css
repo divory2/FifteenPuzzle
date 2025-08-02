@@ -15,6 +15,21 @@ body{
     align-items: center;
     
 }
+
+.user-info {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.user-info a {
+    color: #007bff;
+    text-decoration: none;
+    margin-left: 10px;
+}
+
+.user-info a:hover {
+    text-decoration: underline;
+}
 .form-fields{
     display: flex;
     flex-direction: column;
@@ -65,24 +80,28 @@ body{
   }
   
   .tile1  { background-position:   0%   0%; }
-  .tile2  { background-position:  33.33% 0%; }
-  .tile3  { background-position:  66.66% 0%; }
-  .tile4  { background-position: 100%   0%; }
+  .tile2  { background-position:  25%   0%; }
+  .tile3  { background-position:  50%   0%; }
+  .tile4  { background-position:  75%   0%; }
   
-  .tile5  { background-position:   0%  33.33%; }
-  .tile6  { background-position:  33.33% 33.33%; }
-  .tile7  { background-position:  66.66% 33.33%; }
-  .tile8  { background-position: 100%   33.33%; }
+  .tile5  { background-position:   0%  25%; }
+  .tile6  { background-position:  25%  25%; }
+  .tile7  { background-position:  50%  25%; }
+  .tile8  { background-position:  75%  25%; }
   
-  .tile9  { background-position:   0%  66.66%; }
-  .tile10 { background-position:  33.33% 66.66%; }
-  .tile11 { background-position:  66.66% 66.66%; }
-  .tile12 { background-position: 100%   66.66%; }
+  .tile9  { background-position:   0%  50%; }
+  .tile10 { background-position:  25%  50%; }
+  .tile11 { background-position:  50%  50%; }
+  .tile12 { background-position:  75%  50%; }
   
-  .tile13 { background-position:   0%  100%; }
-  .tile14 { background-position:  33.33% 100%; }
-  .tile15 { background-position:  66.66% 100%; }
-  .tile16 { background: white; cursor: default; }
+  .tile13 { background-position:   0%  75%; }
+  .tile14 { background-position:  25%  75%; }
+  .tile15 { background-position:  50%  75%; }
+  
+  .empty { 
+    background: white; 
+    cursor: default; 
+  }
   
   
   

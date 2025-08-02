@@ -10,7 +10,7 @@ if (isset($_SESSION['player'])) {
     <link rel="stylesheet" href="login.css">
 </head>
 <body>
-    <div><h1>Fiffteen Puzzle</h1></div>
+    <div><h1>Fifteen Puzzle</h1></div>
     <div class="login-form-container">
         <form name="registrationForm" class="form-fields"  onsubmit="return validateForm(event)" action="loginForm.php" method="post">
             <!-- form fields -->

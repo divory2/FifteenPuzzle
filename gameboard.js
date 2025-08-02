@@ -8,6 +8,7 @@ window.onload = function() {
   
     let selectedBackgroundUrl = '';
     let tiles = []; 
+    const gameBoard = document.getElementById('gameBoard'); 
     selector.addEventListener('change', function() {
       const selectedImage = this.value;
       if (selectedImage) {
@@ -159,6 +160,42 @@ window.onload = function() {
       
       
   
+    function tryMoveTile(clickedIdx) {
+        const emptyIdx = tiles.indexOf(null);
+        const size = 4;
+        
+        const clickedRow = Math.floor(clickedIdx / size);
+        const clickedCol = clickedIdx % size;
+        const emptyRow = Math.floor(emptyIdx / size);
+        const emptyCol = emptyIdx % size;
+        
+        // Check if clicked tile is adjacent to empty space
+        const isAdjacent = (Math.abs(clickedRow - emptyRow) === 1 && clickedCol === emptyCol) ||
+                          (Math.abs(clickedCol - emptyCol) === 1 && clickedRow === emptyRow);
+        
+        if (isAdjacent) {
+            // Swap clicked tile with empty space
+            [tiles[clickedIdx], tiles[emptyIdx]] = [tiles[emptyIdx], tiles[clickedIdx]];
+            buildBoard();
+            
+            // Check if puzzle is solved
+            if (isPuzzleSolved()) {
+                setTimeout(() => {
+                    alert("Congratulations! You solved the puzzle!");
+                }, 100);
+            }
+        }
+    }
+
+    function isPuzzleSolved() {
+        for (let i = 0; i < 15; i++) {
+            if (tiles[i] !== i + 1) {
+                return false;
+            }
+        }
+        return tiles[15] === null;
+    }
+
     function clickTile(row, col) {
       console.log(`Tile clicked at row ${row}, col ${col}`);
     }

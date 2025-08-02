@@ -1,9 +1,9 @@
 <?php
-// session_start();
-// if (!isset($_SESSION['player'])) {
-//     header("Location: login.php?error=not_logged_in");
-//     exit();
-// }
+session_start();
+if (!isset($_SESSION['player'])) {
+    header("Location: login.php?error=not_logged_in");
+    exit();
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -14,14 +14,18 @@
 </head>
 <body>
   <h1>Fifteen Puzzle</h1>
+  <div class="user-info">
+    <p>Welcome, <?php echo htmlspecialchars($_SESSION['player']); ?>! 
+    <a href="logout.php">Logout</a></p>
+  </div>
   <div class="menu-container">
     <div class="form-fields-container">
       <form name="menu_options" onsubmit="return startGame(event)">
         <div class="Selector-container">
           <select name="selectBackground" id="backgroundSelector">
             <option value="" disabled selected hidden>Select a background</option>
-            <option value="devon.heic.png">sample 1</option>
-            <option value="shopping.webp">sample 2</option>
+            <option value="images/tlk1.jpg">sample 1</option>
+            <option value="images/tlk2.jpg">sample 2</option>
           </select>
           <br><br>
           <img id="backgroundPreview" class="image-preview" src="" alt="image preview">

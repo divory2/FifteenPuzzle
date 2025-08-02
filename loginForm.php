@@ -71,9 +71,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 //$alter2 = "ALTER TABLE PLAYER MODIFY logout_date DATE DEFAULT NULL";
 
 $currentTime = date("Y-m-d H:i:s");
-$isplayer = "SELECT player, player_password, player_role, id FROM PLAYER WHERE player = '$player'";
-
-$result = $conn->query($isplayer);
+$stmt = $conn->prepare("SELECT player, player_password, player_role, id FROM PLAYER WHERE player = ?");
+$stmt->bind_param("s", $player);
+$stmt->execute();
+$result = $stmt->get_result();
 
 if ($result) {
     if ($result->num_rows > 0) {
@@ -101,19 +102,19 @@ if ($result) {
                 exit();
 
             } else {
-                header("Location: login.html?error=password_incorrect");
+                header("Location: login.php?error=password_incorrect");
                 exit();
             }
         }
         else{
-            header("Location: login.html?error=Wrong_player_name");
+            header("Location: login.php?error=Wrong_player_name");
             exit();
         }
         
  } else {
         // No player found
        // echo "Player not found";
-        header("Location: login.html?error=player_not_registered");
+        header("Location: login.php?error=player_not_registered");
         exit();
     }
 } else {
