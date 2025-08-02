@@ -29,26 +29,55 @@ window.onload = function() {
         event.preventDefault();
         const submittedButton = event.submitter;
         
-        console.log('startGame called, submittedButton:', submittedButton);
+        console.log('🎮 startGame called');
+        console.log('submittedButton:', submittedButton);
         console.log('submittedButton.value:', submittedButton ? submittedButton.value : 'undefined');
         
         if (submittedButton && submittedButton.value === "start") {
-            // Check permission before starting game - both admins and players can play
+            console.log('✅ Start button confirmed');
+            
+            // Check if RBAC is available
             if (typeof RBAC !== 'undefined') {
-                console.log('RBAC is available, checking permissions...');
-                console.log('Current user role before permission check:', RBAC.getCurrentUser().role);
-                console.log('Has play_game permission:', RBAC.hasPermission('play_game'));
+                console.log('✅ RBAC is available');
                 
-                RBAC.executeWithPermission('play_game', function() {
-                    console.log('Permission granted, starting game...');
+                // Get current user info
+                const currentUser = RBAC.getCurrentUser();
+                console.log('👤 Current user info:', currentUser);
+                console.log('🔑 Current user role:', currentUser.role);
+                console.log('📝 User permissions:', currentUser.permissions);
+                
+                // Test permission directly
+                const hasPlayPermission = RBAC.hasPermission('play_game');
+                console.log('🎯 Has play_game permission:', hasPlayPermission);
+                
+                if (hasPlayPermission) {
+                    console.log('✅ Permission check passed - starting game');
                     startGameLogic();
-                }, "You need to be logged in as a player or admin to start the game");
+                } else {
+                    console.log('❌ Permission check failed');
+                    console.log('Available roles with play_game permission:');
+                    
+                    // Check which roles have play_game permission
+                    for (const [role, permissions] of Object.entries(RBAC.roles)) {
+                        if (permissions.includes('play_game')) {
+                            console.log(`  - ${role}: HAS play_game permission`);
+                        } else {
+                            console.log(`  - ${role}: does NOT have play_game permission`);
+                        }
+                    }
+                    
+                    // Use the RBAC error handling
+                    RBAC.executeWithPermission('play_game', function() {
+                        console.log('✅ This should not appear if permission failed');
+                        startGameLogic();
+                    }, "You need to be logged in as a player or admin to start the game");
+                }
             } else {
-                console.log('RBAC not available, starting game directly...');
+                console.log('❌ RBAC not available, starting game directly...');
                 startGameLogic();
             }
         } else {
-            console.log('Not a start game submission');
+            console.log('❌ Not a start game submission or button not found');
         }
     };
     

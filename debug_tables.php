@@ -264,6 +264,7 @@ try {
         <a href="game.php">← Back to Game</a>
         <a href="admin.php">Admin Panel</a>
         <a href="login.php">Login Page</a>
+        <a href="password_debug.php">Password Debug</a>
         <a href="javascript:location.reload()">🔄 Refresh</a>
     </div>
 
@@ -304,6 +305,93 @@ try {
             <p><strong>Status:</strong> Not logged in</p>
         <?php endif; ?>
     </div>
+    
+    <div class="table-container">
+        <h2>🔍 RBAC Debug Test</h2>
+        <p>This will test the RBAC system with your current session data:</p>
+        <button onclick="testRBAC()" style="padding: 10px 20px; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer;">Test RBAC System</button>
+        <div id="rbacResults" style="margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 4px; display: none;"></div>
+    </div>
+
+    <script src="rbac.js"></script>
+    <script>
+        // Debug RBAC system
+        function testRBAC() {
+            const resultsDiv = document.getElementById('rbacResults');
+            resultsDiv.style.display = 'block';
+            let html = '<h3>RBAC Test Results:</h3>';
+            
+            // Test if RBAC is loaded
+            if (typeof RBAC !== 'undefined') {
+                html += '<p>✅ RBAC system is loaded</p>';
+                
+                // Initialize RBAC with PHP session data
+                const userRole = '<?php echo $_SESSION['role'] ?? 'guest'; ?>';
+                const userName = '<?php echo htmlspecialchars($_SESSION['player'] ?? ''); ?>';
+                
+                html += '<p><strong>Initializing RBAC with:</strong></p>';
+                html += '<ul>';
+                html += '<li>Role: ' + userRole + '</li>';
+                html += '<li>Username: ' + userName + '</li>';
+                html += '</ul>';
+                
+                // Initialize RBAC
+                RBAC.init(userRole, userName);
+                
+                // Get current user info
+                const currentUser = RBAC.getCurrentUser();
+                html += '<p><strong>Current User Info:</strong></p>';
+                html += '<ul>';
+                html += '<li>Role: ' + currentUser.role + '</li>';
+                html += '<li>Name: ' + currentUser.name + '</li>';
+                html += '<li>Permissions: ' + currentUser.permissions.join(', ') + '</li>';
+                html += '</ul>';
+                
+                // Test specific permissions
+                const permissions = ['play_game', 'upload_images', 'manage_users', 'view_statistics'];
+                html += '<p><strong>Permission Tests:</strong></p>';
+                html += '<ul>';
+                permissions.forEach(permission => {
+                    const hasPermission = RBAC.hasPermission(permission);
+                    const status = hasPermission ? '✅ GRANTED' : '❌ DENIED';
+                    html += '<li>' + permission + ': ' + status + '</li>';
+                });
+                html += '</ul>';
+                
+                // Test executeWithPermission
+                html += '<p><strong>Testing executeWithPermission for play_game:</strong></p>';
+                html += '<button onclick="testPlayGamePermission()">Test Play Game Permission</button>';
+                html += '<div id="playGameTest"></div>';
+                
+            } else {
+                html += '<p>❌ RBAC system is NOT loaded!</p>';
+                html += '<p>Make sure rbac.js is included and loaded properly.</p>';
+            }
+            
+            resultsDiv.innerHTML = html;
+        }
+        
+        function testPlayGamePermission() {
+            const testDiv = document.getElementById('playGameTest');
+            
+            if (typeof RBAC !== 'undefined') {
+                RBAC.executeWithPermission('play_game', function() {
+                    testDiv.innerHTML = '<p style="color: green;">✅ Play game permission GRANTED - this should work!</p>';
+                }, function(errorMsg) {
+                    testDiv.innerHTML = '<p style="color: red;">❌ Play game permission DENIED: ' + errorMsg + '</p>';
+                });
+            } else {
+                testDiv.innerHTML = '<p style="color: red;">❌ RBAC not available</p>';
+            }
+        }
+        
+        // Auto-run test when page loads if user is logged in
+        <?php if (isset($_SESSION['player'])): ?>
+        window.addEventListener('load', function() {
+            setTimeout(testRBAC, 1000); // Wait 1 second for RBAC to load
+        });
+        <?php endif; ?>
+    </script>
 
     <?php
     // Handle quick actions
