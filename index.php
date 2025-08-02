@@ -51,7 +51,7 @@ if (isset($_SESSION['player'])) {
                 <h3>👑 Admin Access</h3>
                 <p>Admin panel for user management and system settings. Requires admin credentials.</p>
                 <?php if (isset($_SESSION['player']) && $_SESSION['role'] === 'admin'): ?>
-                    <a href="game.php" class="btn btn-admin">Go to Admin Panel</a>
+                    <a href="admin.php" class="btn btn-admin">Go to Admin Panel</a>
                 <?php else: ?>
                     <a href="login.php" class="btn btn-admin">Admin Login</a>
                 <?php endif; ?>
