@@ -7,7 +7,7 @@ window.onload = function() {
     const noBtn = document.getElementById('no');
   
     let selectedBackgroundUrl = '';
-  
+    let tiles = []; 
     selector.addEventListener('change', function() {
       const selectedImage = this.value;
       if (selectedImage) {
@@ -38,7 +38,13 @@ window.onload = function() {
           alert("Please select or upload a background image first.");
           return;
         }
-        buildBoard(4);
+
+
+
+        initTiles();
+
+        buildBoard();
+        //shuffleTiles();
       }
       else if (submittedButton && submittedButton.value === "upload") {
         if (imageUrl) {
@@ -68,24 +74,48 @@ window.onload = function() {
         noBtn.hidden = true;
       }
     };
-  
-    function buildBoard(size) {
-        const gameBoard = document.getElementById('gameBoard');
-        gameBoard.innerHTML = '';
-      
-        for (let i = 0; i < size * size; i++) {
-          const tileNum = i + 1;
-          const tile = document.createElement('div');
-          tile.className = `tile tile${tileNum}`;
-      
-          if (tileNum !== 16) {
-            tile.style.backgroundImage = `url('${selectedBackgroundUrl}')`;
-          }
-      
-          tile.addEventListener('click', () => clickTile(tileNum));
-          gameBoard.appendChild(tile);
+
+
+    function initTiles() {
+        tiles = [];
+        for (let i = 1; i <= 15; i++) {
+          tiles.push(i);
         }
+        tiles.push(null); // last tile is empty
       }
+      
+
+
+
+    function buildBoard() {
+        gameBoard.innerHTML = '';
+        tiles.forEach((tileNum, idx) => {
+          const tile = document.createElement('div');
+          tile.classList.add('tile');
+          if (tileNum === null) {
+            tile.classList.add('empty');
+          } else {
+            tile.classList.add(`tile${tileNum}`);
+            tile.style.backgroundImage = `url('${selectedBackgroundUrl}')`;
+            tile.style.backgroundPosition = getBackgroundPosition(tileNum);
+          }
+          tile.addEventListener('mousedown', () => tryMoveTile(idx));
+          gameBoard.appendChild(tile);
+        });
+      }
+      function getBackgroundPosition(tileNum) {
+        const size = 4;
+        const row = Math.floor((tileNum - 1) / size);
+        const col = (tileNum - 1) % size;
+      
+        // backgroundSize 400% means each tile is 1/4th of the image
+        return `${col * 25}% ${row * 25}%`;
+      }
+      
+      
+
+
+
       
       
   
