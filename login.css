@@ -30,6 +30,151 @@ body{
 .user-info a:hover {
     text-decoration: underline;
 }
+
+/* RBAC Styles */
+.role-indicator {
+    font-weight: bold;
+    padding: 4px 8px;
+    border-radius: 4px;
+    margin: 0 10px;
+}
+
+.role-admin {
+    background-color: #dc3545;
+    color: white;
+}
+
+.role-player {
+    background-color: #28a745;
+    color: white;
+}
+
+.role-guest {
+    background-color: #6c757d;
+    color: white;
+}
+
+.rbac-hidden {
+    display: none !important;
+}
+
+.rbac-disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.admin-panel {
+    border: 2px solid #dc3545;
+    background-color: #f8f9fa;
+    padding: 20px;
+    margin: 20px 0;
+    border-radius: 8px;
+}
+
+.admin-controls {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.admin-only, .player-only {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.admin-only {
+    background-color: #dc3545;
+    color: white;
+}
+
+.admin-only:hover {
+    background-color: #c82333;
+}
+
+.player-only {
+    background-color: #28a745;
+    color: white;
+}
+
+.player-only:hover {
+    background-color: #218838;
+}
+
+.statistics-panel {
+    border: 2px solid #007bff;
+    background-color: #f8f9fa;
+    padding: 20px;
+    margin: 20px 0;
+    border-radius: 8px;
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+}
+
+.admin-table th,
+.admin-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.admin-table th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
+
+.admin-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.role-select {
+    padding: 4px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.update-role-btn,
+.delete-user-btn {
+    padding: 4px 8px;
+    margin: 2px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.update-role-btn {
+    background-color: #28a745;
+    color: white;
+}
+
+.update-role-btn:hover {
+    background-color: #218838;
+}
+
+.delete-user-btn {
+    background-color: #dc3545;
+    color: white;
+}
+
+.delete-user-btn:hover {
+    background-color: #c82333;
+}
+
+.settings-form {
+    padding: 20px;
+}
+
+.settings-form label {
+    display: block;
+    margin: 10px 0;
+}
 .form-fields{
     display: flex;
     flex-direction: column;

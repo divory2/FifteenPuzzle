@@ -34,27 +34,31 @@ window.onload = function() {
       const imageUrl = selectedUploadURL.value.trim();
   
       if (submittedButton && submittedButton.value === "start") {
-        selectedBackgroundUrl = selector.value || imageUrl;
-        if (!selectedBackgroundUrl) {
-          alert("Please select or upload a background image first.");
-          return;
-        }
+        // Check permission before starting game
+        RBAC.executeWithPermission('play_game', function() {
+          selectedBackgroundUrl = selector.value || imageUrl;
+          if (!selectedBackgroundUrl) {
+            alert("Please select or upload a background image first.");
+            return;
+          }
 
-
-
-        initTiles();
-        shuffleTiles();
-        buildBoard();
+          initTiles();
+          shuffleTiles();
+          buildBoard();
+        }, "You need to be logged in as a player to start the game");
         
       }
       else if (submittedButton && submittedButton.value === "upload") {
-        if (imageUrl) {
-          previewUpload.src = imageUrl;
-          addBtn.hidden = false;
-          noBtn.hidden = false;
-        } else {
-          previewUpload.style.display = 'none';
-        }
+        // Check permission before uploading
+        RBAC.executeWithPermission('upload_images', function() {
+          if (imageUrl) {
+            previewUpload.src = imageUrl;
+            addBtn.hidden = false;
+            noBtn.hidden = false;
+          } else {
+            previewUpload.style.display = 'none';
+          }
+        }, "You need player permissions to upload images");
       }
       else if (submittedButton && submittedButton.value === "add") {
         let imageName = prompt("Please enter a name for the image");

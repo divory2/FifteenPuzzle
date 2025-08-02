@@ -65,9 +65,10 @@ try {
     
     // Insert sample players (for testing purposes)
     $samplePlayers = [
+        ['username' => 'admin', 'password' => 'admin123', 'role' => 'admin'],
         ['username' => 'testuser1', 'password' => 'password123', 'role' => 'player'],
         ['username' => 'player1', 'password' => 'mypassword', 'role' => 'player'],
-        ['username' => 'admin', 'password' => 'adminpass', 'role' => 'admin']
+        ['username' => 'demo', 'password' => 'demo123', 'role' => 'player']
     ];
     
     echo "Inserting sample players...\n";
