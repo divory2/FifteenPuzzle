@@ -5,6 +5,8 @@ window.onload = function() {
     const previewUpload = document.getElementById('uploadedPreview');
     const addBtn = document.getElementById('add');
     const noBtn = document.getElementById('no');
+    previewUpload.style.display = 'none';
+
     let timerInterval = null;
     let timeElapsed = 0;
     let selectedBackgroundUrl = '';
@@ -22,12 +24,16 @@ window.onload = function() {
     });
   
     previewUpload.addEventListener('load', () => {
-      previewUpload.style.display = 'block';
-    });
+        if (previewUpload.src && previewUpload.src !== window.location.href) {
+          previewUpload.style.display = 'block';
+        }
+      });
   
     previewUpload.addEventListener('error', () => {
       previewUpload.style.display = 'none';
       alert("Image failed to load. Check your URL.");
+      addBtn.hidden = true;
+      noBtn.hidden = true;
     });
   
     window.startGame = function(event) {
@@ -75,13 +81,15 @@ window.onload = function() {
           option.textContent = imageName;
           selector.appendChild(option);
           selectedUploadURL.value = "";
-          previewUpload.src = "";
+          previewUpload.style.display = 'none';
           addBtn.hidden = true;
           noBtn.hidden = true;
         }
       }
       else if (submittedButton && submittedButton.value === "no") {
         previewUpload.src = "";
+        
+        previewUpload.style.display = 'none';
         addBtn.hidden = true;
         noBtn.hidden = true;
       }
