@@ -13,6 +13,7 @@ window.onload = function() {
     let tiles = []; 
     let moveCount = 0;
 
+    const gameBoard = document.getElementById('gameBoard'); 
     selector.addEventListener('change', function() {
       const selectedImage = this.value;
       if (selectedImage) {
@@ -42,12 +43,13 @@ window.onload = function() {
       const imageUrl = selectedUploadURL.value.trim();
   
       if (submittedButton && submittedButton.value === "start") {
-        selectedBackgroundUrl = selector.value || imageUrl;
-        if (!selectedBackgroundUrl) {
-          alert("Please select or upload a background image first.");
-          return;
-        }
-
+        // Check permission before starting game
+        RBAC.executeWithPermission('play_game', function() {
+          selectedBackgroundUrl = selector.value || imageUrl;
+          if (!selectedBackgroundUrl) {
+            alert("Please select or upload a background image first.");
+            return;
+          }
 
 
         initTiles();
@@ -65,13 +67,16 @@ window.onload = function() {
         
       }
       else if (submittedButton && submittedButton.value === "upload") {
-        if (imageUrl) {
-          previewUpload.src = imageUrl;
-          addBtn.hidden = false;
-          noBtn.hidden = false;
-        } else {
-          previewUpload.style.display = 'none';
-        }
+        // Check permission before uploading
+        RBAC.executeWithPermission('upload_images', function() {
+          if (imageUrl) {
+            previewUpload.src = imageUrl;
+            addBtn.hidden = false;
+            noBtn.hidden = false;
+          } else {
+            previewUpload.style.display = 'none';
+          }
+        }, "You need player permissions to upload images");
       }
       else if (submittedButton && submittedButton.value === "add") {
         let imageName = prompt("Please enter a name for the image");
@@ -243,6 +248,44 @@ function startDrag(e, idx) {
         if (dy > 0) trySlide(idx, 'down');
         else trySlide(idx, 'up');
       }
+    function tryMoveTile(clickedIdx) {
+        const emptyIdx = tiles.indexOf(null);
+        const size = 4;
+        
+        const clickedRow = Math.floor(clickedIdx / size);
+        const clickedCol = clickedIdx % size;
+        const emptyRow = Math.floor(emptyIdx / size);
+        const emptyCol = emptyIdx % size;
+        
+        // Check if clicked tile is adjacent to empty space
+        const isAdjacent = (Math.abs(clickedRow - emptyRow) === 1 && clickedCol === emptyCol) ||
+                          (Math.abs(clickedCol - emptyCol) === 1 && clickedRow === emptyRow);
+        
+        if (isAdjacent) {
+            // Swap clicked tile with empty space
+            [tiles[clickedIdx], tiles[emptyIdx]] = [tiles[emptyIdx], tiles[clickedIdx]];
+            buildBoard();
+            
+            // Check if puzzle is solved
+            if (isPuzzleSolved()) {
+                setTimeout(() => {
+                    alert("Congratulations! You solved the puzzle!");
+                }, 100);
+            }
+        }
+    }
+
+    function isPuzzleSolved() {
+        for (let i = 0; i < 15; i++) {
+            if (tiles[i] !== i + 1) {
+                return false;
+            }
+        }
+        return tiles[15] === null;
+    }
+
+    function clickTile(row, col) {
+      console.log(`Tile clicked at row ${row}, col ${col}`);
     }
   }
 
