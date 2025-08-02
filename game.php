@@ -1,9 +1,9 @@
 <?php
-// session_start();
-// if (!isset($_SESSION['player'])) {
-//     header("Location: login.php?error=not_logged_in");
-//     exit();
-// }
+session_start();
+if (!isset($_SESSION['player'])) {
+    header("Location: login.php?error=not_logged_in");
+    exit();
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
