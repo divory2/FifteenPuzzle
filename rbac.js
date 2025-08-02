@@ -5,13 +5,20 @@
 // Define roles and their permissions
 const roles = {
     admin: [
+        // Admin can do everything
         'manage_users',
         'view_all_games',
         'delete_games',
         'manage_system',
         'play_game',
         'view_statistics',
-        'moderate_content'
+        'view_own_statistics',
+        'moderate_content',
+        'upload_images',
+        'save_game',
+        'access_admin_panel',
+        'manage_content',
+        'system_settings'
     ],
     player: [
         'play_game',
@@ -141,16 +148,16 @@ function updateRoleIndicator() {
  * Apply permissions to buttons and interactive elements
  */
 function applyButtonPermissions() {
-    // Upload button
-    toggleElementAccessByPermission('uploadButton', 'upload_images');
+    // Upload button - both players and admins can upload
+    toggleElementAccessByPermission('uploadImageBtn', 'upload_images');
     
-    // Start game button
+    // Start game button - both players and admins can play
     toggleElementAccessByPermission('startGameBtn', 'play_game');
     
-    // Admin buttons
+    // Admin-only buttons (only admins can see these)
     const adminButtons = document.querySelectorAll('.admin-only');
     adminButtons.forEach(button => {
-        if (hasPermission('manage_users')) {
+        if (currentUserRole === 'admin') {
             button.style.display = 'inline-block';
             button.disabled = false;
         } else {
@@ -159,10 +166,10 @@ function applyButtonPermissions() {
         }
     });
     
-    // Player buttons
+    // Player-only buttons (both players and admins can see these)
     const playerButtons = document.querySelectorAll('.player-only');
     playerButtons.forEach(button => {
-        if (hasPermission('play_game')) {
+        if (currentUserRole === 'player' || currentUserRole === 'admin') {
             button.style.display = 'inline-block';
             button.disabled = false;
         } else {
@@ -229,6 +236,7 @@ function getCurrentUser() {
 
 // Export functions for use in other scripts
 window.RBAC = {
+    init: initializeRBAC, // Alias for backwards compatibility
     initializeRBAC,
     hasPermission,
     toggleElementByPermission,
@@ -237,5 +245,6 @@ window.RBAC = {
     executeWithPermission,
     requirePermissionOrRedirect,
     getCurrentUser,
+    showElementsForRole: applyRoleBasedUI, // Alias for admin.php
     roles
 };

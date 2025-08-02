@@ -15,14 +15,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     try {
         $conn = getDBConnection();
         
-        // Validate user permission
-        if (!isset($_SESSION['player'])) {
-            throw new Exception('User not logged in');
+        // Validate user permission - both players and admins can upload images
+        if (!isset($_SESSION['player']) || !in_array($_SESSION['role'], ['player', 'admin'])) {
+            throw new Exception('You need to be logged in as a player or admin to upload images');
         }
         
         $imageName = trim($_POST['image_name'] ?? '');
         $imageUrl = trim($_POST['image_url'] ?? '');
         $playerId = $_SESSION['playerId'] ?? null;
+        
+        // Double-check that we have a valid player ID
+        if (!$playerId) {
+            throw new Exception('Invalid user session. Please log in again.');
+        }
         
         if (empty($imageName) || empty($imageUrl)) {
             throw new Exception('Image name and URL are required');
@@ -392,7 +397,7 @@ $userImages = getUserImages($conn, $playerId);
                         <img id="backgroundPreview" class="image-preview" src="" alt="Selected image preview" style="display: none;">
                         
                         <div class="game-actions">
-                            <input type="submit" name="action" value="start" class="btn btn-primary" id="startGameBtn">
+                            <input type="submit" name="action" value="start" class="btn btn-primary player-only" id="startGameBtn">
                         </div>
                     </div>
 
@@ -413,7 +418,7 @@ $userImages = getUserImages($conn, $playerId);
                             
                             <img id="uploadPreview" class="image-preview" src="" alt="Upload preview" style="display: none;">
                             
-                            <button type="button" id="uploadImageBtn" class="btn btn-secondary">Upload Image</button>
+                            <button type="button" id="uploadImageBtn" class="btn btn-secondary player-only">Upload Image</button>
                             
                             <div id="uploadSuccess" class="upload-success"></div>
                             <div id="uploadError" class="upload-error"></div>
@@ -462,6 +467,8 @@ $userImages = getUserImages($conn, $playerId);
             // Initialize RBAC
             if (typeof RBAC !== 'undefined') {
                 RBAC.init(userRole, userName);
+                // Apply role-based UI changes
+                RBAC.applyRoleBasedUI();
             }
             
             // Image upload functionality
@@ -493,6 +500,12 @@ $userImages = getUserImages($conn, $playerId);
                 
                 if (!imageUrl || !imageName) {
                     showUploadError('Please enter both image URL and name');
+                    return;
+                }
+                
+                // Check permission before uploading
+                if (typeof RBAC !== 'undefined' && !RBAC.hasPermission('upload_images')) {
+                    showUploadError('You need to be logged in as a player or admin to upload images');
                     return;
                 }
                 

@@ -30,11 +30,11 @@ window.onload = function() {
         const submittedButton = event.submitter;
         
         if (submittedButton && submittedButton.value === "start") {
-            // Check permission before starting game
+            // Check permission before starting game - both admins and players can play
             if (typeof RBAC !== 'undefined') {
                 RBAC.executeWithPermission('play_game', function() {
                     startGameLogic();
-                }, "You need player permissions to start the game");
+                }, "You need to be logged in as a player or admin to start the game");
             } else {
                 startGameLogic();
             }
