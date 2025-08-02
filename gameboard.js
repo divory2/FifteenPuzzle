@@ -1,112 +1,86 @@
 window.onload = function() {
     const selector = document.getElementById('backgroundSelector');
     const preview = document.getElementById('backgroundPreview');
-    const selectedUploadURL = document.getElementById('url');
-    const previewUpload = document.getElementById('uploadedPreview');
-    const addBtn = document.getElementById('add');
-    const noBtn = document.getElementById('no');
-    previewUpload.style.display = 'none';
-
+    
     let timerInterval = null;
     let timeElapsed = 0;
     let selectedBackgroundUrl = '';
     let tiles = []; 
     let moveCount = 0;
+    let gameActive = false;
 
     const gameBoard = document.getElementById('gameBoard'); 
-    selector.addEventListener('change', function() {
-      const selectedImage = this.value;
-      if (selectedImage) {
-        preview.src = selectedImage;
-        preview.style.display = 'block';
-      } else {
-        preview.style.display = 'none';
-      }
-    });
-  
-    previewUpload.addEventListener('load', () => {
-        if (previewUpload.src && previewUpload.src !== window.location.href) {
-          previewUpload.style.display = 'block';
-        }
-      });
-  
-    previewUpload.addEventListener('error', () => {
-      previewUpload.style.display = 'none';
-      alert("Image failed to load. Check your URL.");
-      addBtn.hidden = true;
-      noBtn.hidden = true;
-    });
+    
+    // Handle background image selection
+    if (selector) {
+        selector.addEventListener('change', function() {
+            const selectedImage = this.value;
+            if (selectedImage) {
+                selectedBackgroundUrl = selectedImage;
+                preview.src = selectedImage;
+                preview.style.display = 'block';
+            } else {
+                preview.style.display = 'none';
+            }
+        });
+    }
   
     window.startGame = function(event) {
-      event.preventDefault();
-      const submittedButton = event.submitter;
-      const imageUrl = selectedUploadURL.value.trim();
-  
-      if (submittedButton && submittedButton.value === "start") {
-        // Check permission before starting game
-        RBAC.executeWithPermission('play_game', function() {
-          selectedBackgroundUrl = selector.value || imageUrl;
-          if (!selectedBackgroundUrl) {
-            alert("Please select or upload a background image first.");
-            return;
-          }
-
-          initTiles();
-          shuffleTiles();
-          buildBoard();
-          // Reset & start timer
-          moveCount = 0;
-          timeElapsed = 0;
-          updateTimerDisplay();
-          if (timerInterval) clearInterval(timerInterval);
-          timerInterval = setInterval(() => {
-              timeElapsed++;
-              updateTimerDisplay();
-          }, 1000);
-        }, "You need player permissions to start the game");
-      }
-      else if (submittedButton && submittedButton.value === "upload") {
-        // Check permission before uploading
-        RBAC.executeWithPermission('upload_images', function() {
-          if (imageUrl) {
-            previewUpload.src = imageUrl;
-            addBtn.hidden = false;
-            noBtn.hidden = false;
-          } else {
-            previewUpload.style.display = 'none';
-          }
-        }, "You need player permissions to upload images");
-      }
-      else if (submittedButton && submittedButton.value === "add") {
-        let imageName = prompt("Please enter a name for the image");
-        if (imageName && imageName.trim()) {
-          const option = document.createElement('option');
-          option.value = imageUrl;
-          option.textContent = imageName;
-          selector.appendChild(option);
-          selectedUploadURL.value = "";
-          previewUpload.style.display = 'none';
-          addBtn.hidden = true;
-          noBtn.hidden = true;
-        }
-      }
-      else if (submittedButton && submittedButton.value === "no") {
-        previewUpload.src = "";
+        event.preventDefault();
+        const submittedButton = event.submitter;
         
-        previewUpload.style.display = 'none';
-        addBtn.hidden = true;
-        noBtn.hidden = true;
-      }
+        if (submittedButton && submittedButton.value === "start") {
+            // Check permission before starting game
+            if (typeof RBAC !== 'undefined') {
+                RBAC.executeWithPermission('play_game', function() {
+                    startGameLogic();
+                }, "You need player permissions to start the game");
+            } else {
+                startGameLogic();
+            }
+        }
     };
+    
+    function startGameLogic() {
+        selectedBackgroundUrl = selector.value;
+        if (!selectedBackgroundUrl) {
+            alert("Please select a background image first.");
+            return;
+        }
 
-
+        initTiles();
+        shuffleTiles();
+        buildBoard();
+        
+        // Reset & start timer
+        moveCount = 0;
+        timeElapsed = 0;
+        gameActive = true;
+        updateTimerDisplay();
+        updateMoveCounter();
+        
+        if (timerInterval) clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+            if (gameActive) {
+                timeElapsed++;
+                updateTimerDisplay();
+            }
+        }, 1000);
+        
+        // Show game message
+        const gameMessage = document.getElementById('gameMessage');
+        if (gameMessage) {
+            gameMessage.textContent = "Game started! Click and drag tiles to move them.";
+        }
+    }
+      
     function initTiles() {
         tiles = [];
         for (let i = 1; i <= 15; i++) {
           tiles.push(i);
         }
         tiles.push(null); // last tile is empty
-      }
+    }
       
 
 
@@ -186,8 +160,18 @@ window.onload = function() {
           if (tiles[i] !== i + 1) return;
         }
         if (tiles[15] === null) {
+          gameActive = false;
           clearInterval(timerInterval); // stop timer
-          alert(`🎉 You solved the puzzle in ${timeElapsed} seconds!`);
+          
+          const gameMessage = document.getElementById('gameMessage');
+          if (gameMessage) {
+            gameMessage.innerHTML = `🎉 <strong>Congratulations!</strong> You solved the puzzle in ${timeElapsed} seconds with ${moveCount} moves!`;
+          }
+          
+          // You could add game session saving here
+          setTimeout(() => {
+            alert(`🎉 You solved the puzzle in ${timeElapsed} seconds with ${moveCount} moves!`);
+          }, 100);
         }
       }
       
@@ -214,6 +198,8 @@ window.onload = function() {
         if (isAdjacent) {
           // swap tiles
           [tiles[idx], tiles[emptyIndex]] = [tiles[emptyIndex], tiles[idx]];
+          moveCount++;
+          updateMoveCounter();
           buildBoard();
           checkIfSolved();
         }
@@ -247,44 +233,6 @@ function startDrag(e, idx) {
         if (dy > 0) trySlide(idx, 'down');
         else trySlide(idx, 'up');
       }
-    function tryMoveTile(clickedIdx) {
-        const emptyIdx = tiles.indexOf(null);
-        const size = 4;
-        
-        const clickedRow = Math.floor(clickedIdx / size);
-        const clickedCol = clickedIdx % size;
-        const emptyRow = Math.floor(emptyIdx / size);
-        const emptyCol = emptyIdx % size;
-        
-        // Check if clicked tile is adjacent to empty space
-        const isAdjacent = (Math.abs(clickedRow - emptyRow) === 1 && clickedCol === emptyCol) ||
-                          (Math.abs(clickedCol - emptyCol) === 1 && clickedRow === emptyRow);
-        
-        if (isAdjacent) {
-            // Swap clicked tile with empty space
-            [tiles[clickedIdx], tiles[emptyIdx]] = [tiles[emptyIdx], tiles[clickedIdx]];
-            buildBoard();
-            
-            // Check if puzzle is solved
-            if (isPuzzleSolved()) {
-                setTimeout(() => {
-                    alert("Congratulations! You solved the puzzle!");
-                }, 100);
-            }
-        }
-    }
-
-    function isPuzzleSolved() {
-        for (let i = 0; i < 15; i++) {
-            if (tiles[i] !== i + 1) {
-                return false;
-            }
-        }
-        return tiles[15] === null;
-    }
-
-    function clickTile(row, col) {
-      console.log(`Tile clicked at row ${row}, col ${col}`);
     }
   }
 
@@ -296,7 +244,6 @@ function startDrag(e, idx) {
 
   document.addEventListener('mousemove', onMove);
   document.addEventListener('mouseup', onUp);
-
 }
 
 function updateMoveCounter() {

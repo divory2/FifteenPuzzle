@@ -63,6 +63,28 @@ try {
         throw new Exception("Error creating GAME_SESSIONS table: " . $conn->error);
     }
     
+    // Create IMAGES table for uploaded images
+    $sql = "CREATE TABLE IF NOT EXISTS IMAGES (
+        id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+        image_name VARCHAR(100) NOT NULL,
+        original_url VARCHAR(500) NOT NULL,
+        file_path VARCHAR(255) NOT NULL,
+        uploaded_by INT(6) UNSIGNED,
+        upload_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        file_size INT DEFAULT 0,
+        image_width INT DEFAULT 0,
+        image_height INT DEFAULT 0,
+        FOREIGN KEY (uploaded_by) REFERENCES PLAYER(id) ON DELETE CASCADE,
+        INDEX idx_uploaded_by (uploaded_by),
+        INDEX idx_upload_date (upload_date)
+    )";
+    
+    if ($conn->query($sql) === TRUE) {
+        echo "Table 'IMAGES' created successfully or already exists\n";
+    } else {
+        throw new Exception("Error creating IMAGES table: " . $conn->error);
+    }
+    
     // Insert sample players (for testing purposes)
     $samplePlayers = [
         ['username' => 'admin', 'password' => 'admin123', 'role' => 'admin'],
