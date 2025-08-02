@@ -42,9 +42,9 @@ window.onload = function() {
 
 
         initTiles();
-
+        shuffleTiles();
         buildBoard();
-        //shuffleTiles();
+        
       }
       else if (submittedButton && submittedButton.value === "upload") {
         if (imageUrl) {
@@ -111,6 +111,46 @@ window.onload = function() {
         // backgroundSize 400% means each tile is 1/4th of the image
         return `${col * 25}% ${row * 25}%`;
       }
+      function shuffleTiles() {
+        // Fisher-Yates shuffle for array
+        for (let i = tiles.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [tiles[i], tiles[j]] = [tiles[j], tiles[i]];
+        }
+      
+        // Ensure the puzzle is solvable (optional advanced step)
+        if (!isSolvable(tiles)) {
+          // swap two tiles (not including empty) to fix solvability
+          if (tiles[0] !== null && tiles[1] !== null) {
+            [tiles[0], tiles[1]] = [tiles[1], tiles[0]];
+          } else {
+            [tiles[2], tiles[3]] = [tiles[3], tiles[2]];
+          }
+        }
+      }
+      
+      // Check solvability (optional, but recommended)
+      function isSolvable(arr) {
+        const size = 4;
+        let invCount = 0;
+        const tileList = arr.filter(n => n !== null);
+        for (let i = 0; i < tileList.length -1; i++) {
+          for (let j = i + 1; j < tileList.length; j++) {
+            if (tileList[i] > tileList[j]) invCount++;
+          }
+        }
+        const emptyRow = Math.floor(arr.indexOf(null) / size);
+        if (size % 2 === 1) {
+          return invCount % 2 === 0;
+        } else {
+          if ((size - emptyRow) % 2 === 1) {
+            return invCount % 2 === 0;
+          } else {
+            return invCount % 2 === 1;
+          }
+        }
+      }
+      
       
       
 
