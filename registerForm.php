@@ -120,16 +120,3 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     exit();
 }
 ?>
-           exit();
-       } else {
-           echo "Error: " . $stmt->error;
-       }
-        }
-        
-    } catch (Exception $e) {
-        error_log("Registration error: " . $e->getMessage());
-        header("Location: login.php?error=database_error");
-        exit();
-    }
-}
-?>

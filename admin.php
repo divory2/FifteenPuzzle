@@ -223,16 +223,18 @@ $role = $_SESSION['role'];
     <script src="rbac.js"></script>
     <script src="admin.js"></script>
     <script>
-        // Initialize RBAC system with admin user data
+        // Initialize simplified RBAC system
         document.addEventListener('DOMContentLoaded', function() {
             const userRole = '<?php echo $_SESSION['role']; ?>';
             const username = '<?php echo $_SESSION['player']; ?>';
             
-            // Initialize RBAC with admin role
-            RBAC.init(userRole, username);
+            console.log('🔧 Admin panel - initializing RBAC:', { role: userRole, username: username });
             
-            // Show admin-specific UI elements
-            RBAC.showElementsForRole();
+            // Initialize RBAC (simplified version)
+            if (typeof RBAC !== 'undefined') {
+                RBAC.init(userRole, username);
+                console.log('✅ Admin RBAC initialized');
+            }
             
             // Add click handlers for quick actions
             document.getElementById('refreshData').addEventListener('click', function() {

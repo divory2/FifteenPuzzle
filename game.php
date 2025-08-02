@@ -316,10 +316,35 @@ $userImages = getUserImages($conn, $playerId);
             animation: tileMove 0.3s ease-out;
         }
         
+        .tile.invalid-move {
+            animation: invalidMove 0.3s ease-out;
+        }
+        
+        .tile-number {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            z-index: 10;
+            pointer-events: none;
+        }
+        
         @keyframes tileMove {
             0% { transform: scale(1.1); }
             50% { transform: scale(0.95) rotate(1deg); }
             100% { transform: scale(1) rotate(0deg); }
+        }
+        
+        @keyframes invalidMove {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+            100% { transform: translateX(0); }
         }
         
         .game-completed {
@@ -356,6 +381,55 @@ $userImages = getUserImages($conn, $playerId);
         
         .game-actions {
             margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #2980b9, #1f639a);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, #7f8c8d, #6c7b7d);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(149, 165, 166, 0.3);
+        }
+        
+        .btn-info {
+            background: linear-gradient(135deg, #e67e22, #d35400);
+            color: white;
+        }
+        
+        .btn-info:hover {
+            background: linear-gradient(135deg, #d35400, #ba4a00);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(230, 126, 34, 0.3);
         }
         
         .navigation {
@@ -475,7 +549,9 @@ $userImages = getUserImages($conn, $playerId);
                         <img id="backgroundPreview" class="image-preview" src="" alt="Selected image preview" style="display: none;">
                         
                         <div class="game-actions">
-                            <input type="submit" name="action" value="start" class="btn btn-primary player-only" id="startGameBtn">
+                            <input type="submit" name="action" value="🎮 Start Game" class="btn btn-primary" id="startGameBtn">
+                            <button type="button" onclick="restartGame()" class="btn btn-secondary" id="restartGameBtn" style="display: none;">🔄 Restart</button>
+                            <button type="button" onclick="showSolution()" class="btn btn-info" id="solutionBtn" style="display: none;">💡 Show Solution</button>
                         </div>
                     </div>
 
@@ -509,6 +585,16 @@ $userImages = getUserImages($conn, $playerId);
         <div class="game-board-container">
             <h3>🎯 Game Board</h3>
             
+            <div class="game-instructions" style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; color: #2c3e50;">
+                <strong>📋 How to Play:</strong>
+                <ul style="margin: 10px 0 0 20px; text-align: left;">
+                    <li>Click tiles adjacent to the empty space to move them</li>
+                    <li>You can also drag tiles to the empty space</li>
+                    <li>Arrange the tiles in order from 1-15 to win</li>
+                    <li>The empty space should be in the bottom-right corner</li>
+                </ul>
+            </div>
+            
             <div class="game-stats">
                 <div class="stat-item">
                     <h4>Time</h4>
@@ -537,30 +623,51 @@ $userImages = getUserImages($conn, $playerId);
     <script src="rbac.js"></script>
     <script src="gameboard.js"></script>
     <script>
-        // Initialize RBAC system with user data from PHP session
+        // Make PHP session data immediately available to JavaScript
+        window.phpSessionData = {
+            role: '<?php echo $_SESSION['role'] ?? 'guest'; ?>',
+            player: '<?php echo htmlspecialchars($_SESSION['player'] ?? ''); ?>',
+            playerId: '<?php echo $_SESSION['playerId'] ?? ''; ?>'
+        };
+        
+        // Initialize simplified RBAC system
         document.addEventListener('DOMContentLoaded', function() {
-            const userRole = '<?php echo $_SESSION['role'] ?? 'player'; ?>';
-            const userName = '<?php echo htmlspecialchars($_SESSION['player']); ?>';
+            const userRole = window.phpSessionData.role;
+            const userName = window.phpSessionData.player;
             
-            // Debug logging
-            console.log('Session data from PHP:');
-            console.log('Role:', userRole);
-            console.log('Username:', userName);
-            console.log('PHP Session player:', '<?php echo isset($_SESSION['player']) ? $_SESSION['player'] : 'NOT SET'; ?>');
-            console.log('PHP Session role:', '<?php echo isset($_SESSION['role']) ? $_SESSION['role'] : 'NOT SET'; ?>');
+            console.log('🔧 Session data:', window.phpSessionData);
             
-            // Initialize RBAC
+            // Initialize RBAC (simplified - just for role display and admin panel access)
             if (typeof RBAC !== 'undefined') {
                 RBAC.init(userRole, userName);
-                // Apply role-based UI changes
-                RBAC.applyRoleBasedUI();
-                
-                // Test permission check
-                console.log('Testing play_game permission:', RBAC.hasPermission('play_game'));
-                console.log('Current user info:', RBAC.getCurrentUser());
-            } else {
-                console.error('RBAC is not defined!');
+                console.log('✅ RBAC initialized for role:', userRole);
             }
+            
+            // Game control functions
+            window.showGameControls = function() {
+                document.getElementById('startGameBtn').style.display = 'none';
+                document.getElementById('restartGameBtn').style.display = 'inline-block';
+                document.getElementById('solutionBtn').style.display = 'inline-block';
+            };
+            
+            window.hideGameControls = function() {
+                document.getElementById('startGameBtn').style.display = 'inline-block';
+                document.getElementById('restartGameBtn').style.display = 'none';
+                document.getElementById('solutionBtn').style.display = 'none';
+            };
+            
+            window.showSolution = function() {
+                if (confirm('This will show you the correct arrangement. Are you sure?')) {
+                    const gameMessage = document.getElementById('gameMessage');
+                    gameMessage.innerHTML = `
+                        <div style="margin: 10px 0; padding: 10px; background: #e8f4f8; border-radius: 5px; border-left: 4px solid #3498db;">
+                            <strong>💡 Solution Hint:</strong><br>
+                            The tiles should be arranged in order from 1-15, with the empty space in the bottom-right corner.<br>
+                            <small>Top row: 1, 2, 3, 4 | Second row: 5, 6, 7, 8 | etc.</small>
+                        </div>
+                    `;
+                }
+            };
             
             // Image upload functionality
             const uploadBtn = document.getElementById('uploadImageBtn');
@@ -594,9 +701,9 @@ $userImages = getUserImages($conn, $playerId);
                     return;
                 }
                 
-                // Check permission before uploading
-                if (typeof RBAC !== 'undefined' && !RBAC.hasPermission('upload_images')) {
-                    showUploadError('You need to be logged in as a player or admin to upload images');
+                // Check permission before uploading (simplified - everyone logged in can upload)
+                if (!window.phpSessionData || !window.phpSessionData.player) {
+                    showUploadError('You need to be logged in to upload images');
                     return;
                 }
                 
