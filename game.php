@@ -813,45 +813,15 @@ $userImages = getUserImages($conn, $playerId);
             const gameForm = document.getElementById('gameForm');
             if (gameForm) {
                 gameForm.addEventListener('submit', function(e) {
-                    const submitter = e.submitter;
+                    // Remove required attributes for game start (upload is separate)
                     const imageUrlInput = document.getElementById('imageUrl');
                     const imageNameInput = document.getElementById('imageName');
-                    
-                    if (submitter && submitter.id === 'uploadImageBtn') {
-                        // If uploading, make fields required
-                        imageUrlInput.setAttribute('required', 'required');
-                        imageNameInput.setAttribute('required', 'required');
-                    } else {
-                        // If starting game, remove required attributes
-                        imageUrlInput.removeAttribute('required');
-                        imageNameInput.removeAttribute('required');
-                    }
+                    imageUrlInput.removeAttribute('required');
+                    imageNameInput.removeAttribute('required');
                 });
             }
             
-            // Also handle the upload button click to set required attributes
-            const uploadBtn = document.getElementById('uploadImageBtn');
-            if (uploadBtn) {
-                uploadBtn.addEventListener('click', function() {
-                    const imageUrlInput = document.getElementById('imageUrl');
-                    const imageNameInput = document.getElementById('imageName');
-                    
-                    // Validate manually since we removed required attribute
-                    if (!imageUrlInput.value.trim()) {
-                        imageUrlInput.focus();
-                        showUploadError('Image URL is required');
-                        return;
-                    }
-                    
-                    if (!imageNameInput.value.trim()) {
-                        imageNameInput.focus();
-                        showUploadError('Image name is required');
-                        return;
-                    }
-                    
-                    // If validation passes, proceed with existing upload logic
-                });
-            }
+
         });
     </script>
 </body>
