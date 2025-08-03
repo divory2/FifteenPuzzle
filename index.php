@@ -48,6 +48,12 @@ if (isset($_SESSION['player'])) {
             </div>
             
             <div class="nav-card">
+                <h3>🏆 Leaderboard</h3>
+                <p>View top scores, fastest times, and compete with other players from around the world!</p>
+                <a href="leaderboard.php" class="btn btn-info">View Leaderboard</a>
+            </div>
+            
+            <div class="nav-card">
                 <h3>👑 Admin Access</h3>
                 <p>Admin panel for user management and system settings. Requires admin credentials.</p>
                 <?php if (isset($_SESSION['player']) && $_SESSION['role'] === 'admin'): ?>

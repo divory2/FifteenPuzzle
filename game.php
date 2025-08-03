@@ -626,6 +626,7 @@ $userImages = getUserImages($conn, $playerId);
 
         <div class="navigation">
             <a href="index.php">🏠 Home</a>
+            <a href="leaderboard.php">🏆 Leaderboard</a>
             <?php if ($_SESSION['role'] === 'admin'): ?>
                 <a href="admin.php">👑 Admin Panel</a>
             <?php endif; ?>
