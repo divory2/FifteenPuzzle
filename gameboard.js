@@ -25,9 +25,83 @@ window.onload = function() {
     let tiles = []; 
     let moveCount = 0;
     let gameActive = false;
+    let currentSessionId = null; // Track current game session
     
     // Puzzle state: 0-14 are tile numbers, 15 is empty space
     let puzzleState = [];
+
+    // Session management functions
+    async function startGameSession(backgroundImage) {
+        try {
+            const formData = new FormData();
+            formData.append('action', 'start_game');
+            formData.append('background_image', backgroundImage || '');
+            
+            const response = await fetch('game_session.php', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const data = await response.json();
+            if (data.success) {
+                currentSessionId = data.session_id;
+                console.log('✅ Game session started:', currentSessionId);
+                return data.session_id;
+            } else {
+                console.error('❌ Failed to start session:', data.message);
+                return null;
+            }
+        } catch (error) {
+            console.error('❌ Session start error:', error);
+            return null;
+        }
+    }
+    
+    async function updateMoveCount(moves) {
+        if (!currentSessionId) return;
+        
+        try {
+            const formData = new FormData();
+            formData.append('action', 'update_moves');
+            formData.append('session_id', currentSessionId);
+            formData.append('move_count', moves);
+            
+            fetch('game_session.php', {
+                method: 'POST',
+                body: formData
+            }).catch(error => console.error('Move update error:', error));
+        } catch (error) {
+            console.error('❌ Move update error:', error);
+        }
+    }
+    
+    async function completeGameSession(moves) {
+        if (!currentSessionId) return;
+        
+        try {
+            const formData = new FormData();
+            formData.append('action', 'complete_game');
+            formData.append('session_id', currentSessionId);
+            formData.append('move_count', moves);
+            
+            const response = await fetch('game_session.php', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const data = await response.json();
+            if (data.success) {
+                console.log('🏆 Game completed and saved!', data);
+                return data;
+            } else {
+                console.error('❌ Failed to complete session:', data.message);
+                return null;
+            }
+        } catch (error) {
+            console.error('❌ Session complete error:', error);
+            return null;
+        }
+    }
 
     // Background image selection
     if (selector && preview) {
@@ -57,8 +131,18 @@ window.onload = function() {
             return false;
         }
         
-        // Start the actual game
-        initializeGame();
+        // Test if image loads before starting game
+        const testImg = new Image();
+        testImg.onload = function() {
+            console.log('✅ Image loaded successfully');
+            initializeGame();
+        };
+        testImg.onerror = function() {
+            console.error('❌ Failed to load image:', selectedBackgroundUrl);
+            alert('Failed to load the selected image. Please choose a different image.');
+        };
+        testImg.src = selectedBackgroundUrl;
+        
         return false;
     };
     
@@ -72,10 +156,21 @@ window.onload = function() {
     function initializeGame() {
         console.log('🎯 Initializing game with image:', selectedBackgroundUrl);
         
+        // Check if gameBoard element exists
+        if (!gameBoard) {
+            gameBoard = document.getElementById('gameBoard');
+            if (!gameBoard) {
+                console.error('❌ Game board element not found!');
+                alert('Game board not found. Please refresh the page.');
+                return;
+            }
+        }
+        
         // Reset game state
         gameActive = true;
         moveCount = 0;
         timeElapsed = 0;
+        currentSessionId = null; // Reset session
         
         // Clear any existing timer
         if (timerInterval) {
@@ -88,6 +183,9 @@ window.onload = function() {
         document.getElementById('gameMessage').textContent = 'Game started! Click tiles adjacent to the empty space to move them.';
         document.getElementById('gameMessage').style.color = '#2c3e50';
         
+        // Start game session (async)
+        startGameSession(selectedBackgroundUrl);
+        
         // Show game controls
         if (typeof showGameControls !== 'undefined') {
             showGameControls();
@@ -95,11 +193,22 @@ window.onload = function() {
         
         // Create the puzzle
         createPuzzleTiles();
+        
+        // Now update the content after tiles are in the DOM
+        for (let position = 0; position < 16; position++) {
+            updateTileContent(tiles[position], position);
+        }
+        
         shufflePuzzle();
         startTimer();
     }
 
     function createPuzzleTiles() {
+        if (!gameBoard) {
+            console.error('❌ Game board element not found!');
+            return;
+        }
+        
         gameBoard.innerHTML = '';
         tiles = [];
         
@@ -112,56 +221,83 @@ window.onload = function() {
             tile.className = 'tile';
             tile.dataset.position = position;
             
-            updateTileContent(tile, position);
             gameBoard.appendChild(tile);
             tiles.push(tile);
         }
+        
+        console.log('✅ Created 16 tiles successfully');
     }
     
     function updateTileContent(tile, position) {
         const tileNumber = puzzleState[position];
         
+        // Clear existing content and event listeners
+        tile.onclick = null;
+        tile.ondragstart = null;
+        tile.ondragover = null;
+        tile.ondrop = null;
+        tile.draggable = false;
+        
+        // Remove existing event listeners by cloning (only if tile has parent)
+        let workingTile = tile;
+        if (tile.parentNode) {
+            const newTile = tile.cloneNode(false);
+            tile.parentNode.replaceChild(newTile, tile);
+            tiles[position] = newTile;
+            workingTile = newTile;
+        }
+        
         if (tileNumber === 15) {
             // Empty tile
-            tile.classList.add('empty');
-            tile.classList.remove('game-tile');
-            tile.style.backgroundImage = '';
-            tile.innerHTML = '';
-            tile.style.cursor = 'default';
-            tile.onclick = null;
+            workingTile.classList.add('empty');
+            workingTile.classList.remove('game-tile');
+            workingTile.style.backgroundImage = '';
+            workingTile.innerHTML = '';
+            workingTile.style.cursor = 'default';
+            workingTile.draggable = false;
         } else {
             // Regular tile
-            tile.classList.remove('empty');
-            tile.classList.add('game-tile');
-            tile.style.backgroundImage = `url('${selectedBackgroundUrl}')`;
-            tile.style.cursor = 'pointer';
+            workingTile.classList.remove('empty');
+            workingTile.classList.add('game-tile');
+            workingTile.style.backgroundImage = `url('${selectedBackgroundUrl}')`;
+            workingTile.style.cursor = 'pointer';
             
             // Calculate background position for this tile
+            // Each tile shows 1/4 of the total image
             const row = Math.floor(tileNumber / 4);
             const col = tileNumber % 4;
-            const bgX = -(col * 25); // 25% per column (100% / 4 columns)
-            const bgY = -(row * 25); // 25% per row (100% / 4 rows)
             
-            tile.style.backgroundPosition = `${bgX}% ${bgY}%`;
-            tile.style.backgroundSize = '400% 400%';
+            // Calculate the background position as percentage
+            // For a 4x4 grid: 0%, 33.33%, 66.67%, 100% positions
+            const bgX = (col / 3) * 100; // 0, 33.33, 66.67 for cols 0,1,2,3
+            const bgY = (row / 3) * 100; // 0, 33.33, 66.67 for rows 0,1,2,3
             
-            // Add tile number for clarity
-            tile.innerHTML = `<div class="tile-number">${tileNumber + 1}</div>`;
+            workingTile.style.backgroundPosition = `${bgX}% ${bgY}%`;
+            workingTile.style.backgroundSize = '400% 400%';
+            
+            // Debug logging for tile positioning
+            console.log(`🎯 Tile ${tileNumber + 1}: row=${row}, col=${col}, bgPos=${bgX}%,${bgY}%`);
+            
+            // Add tile number for clarity with better styling
+            workingTile.innerHTML = `<div class="tile-number">${tileNumber + 1}</div>`;
             
             // Add click handler
-            tile.onclick = () => handleTileClick(position);
+            workingTile.onclick = () => handleTileClick(position);
             
             // Add drag handlers
-            tile.draggable = true;
-            tile.addEventListener('dragstart', (e) => handleDragStart(e, position));
-            tile.addEventListener('dragover', handleDragOver);
-            tile.addEventListener('drop', (e) => handleDrop(e, position));
+            workingTile.draggable = true;
+            workingTile.addEventListener('dragstart', (e) => handleDragStart(e, position));
+            workingTile.addEventListener('dragover', handleDragOver);
+            workingTile.addEventListener('drop', (e) => handleDrop(e, position));
         }
     }
 
     function shufflePuzzle() {
         // Start with solved state
         puzzleState = Array.from({length: 16}, (_, i) => i);
+        
+        // Make puzzleState globally accessible for debugging
+        window.puzzleState = puzzleState;
         
         // Perform 1000 random valid moves to ensure solvability
         for (let i = 0; i < 1000; i++) {
@@ -181,6 +317,8 @@ window.onload = function() {
         }
         
         console.log('🔀 Puzzle shuffled:', puzzleState);
+        console.log('🎮 Game ready! Tiles should now display correctly.');
+        console.log('🔧 Type debugTiles() in console to see current arrangement');
     }
 
     function getAdjacentPositions(pos) {
@@ -213,6 +351,9 @@ window.onload = function() {
             
             moveCount++;
             document.getElementById('moveCounter').textContent = moveCount;
+            
+            // Update session with move count
+            updateMoveCount(moveCount);
             
             // Add animation
             tiles[position].classList.add('moved');
@@ -265,20 +406,48 @@ window.onload = function() {
         else if (moveCount <= 300) rating = '🥉 Well done!';
         else rating = '👍 Good effort!';
         
-        // Update message with celebration and options
-        document.getElementById('gameMessage').innerHTML = `
-            <div style="text-align: center; padding: 20px;">
-                <div style="font-size: 2em; margin-bottom: 10px;">🎉 PUZZLE SOLVED! 🎉</div>
-                <div style="font-size: 1.2em; margin-bottom: 15px;">${rating}</div>
-                <div style="margin-bottom: 15px;">
-                    <strong>Your Stats:</strong><br>
-                    ⏱️ Time: <strong>${timeStr}</strong><br>
-                    🎯 Moves: <strong>${moveCount}</strong>
+        // Complete game session
+        completeGameSession(moveCount).then(sessionData => {
+            let leaderboardMessage = '';
+            if (sessionData && sessionData.success) {
+                leaderboardMessage = '<div style="margin-top: 10px;"><a href="leaderboard.php" class="btn btn-info" style="margin: 5px;">🏆 View Leaderboard</a></div>';
+            }
+            
+            // Update message with celebration and options
+            document.getElementById('gameMessage').innerHTML = `
+                <div style="text-align: center; padding: 20px;">
+                    <div style="font-size: 2em; margin-bottom: 10px;">🎉 PUZZLE SOLVED! 🎉</div>
+                    <div style="font-size: 1.2em; margin-bottom: 15px;">${rating}</div>
+                    <div style="margin-bottom: 15px;">
+                        <strong>Your Stats:</strong><br>
+                        ⏱️ Time: <strong>${timeStr}</strong><br>
+                        🎯 Moves: <strong>${moveCount}</strong>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <button onclick="restartGame()" class="btn btn-primary" style="margin: 5px;">🔄 Play Again</button>
+                        <button onclick="location.reload()" class="btn btn-secondary" style="margin: 5px;">🖼️ Choose New Image</button>
+                    </div>
+                    ${leaderboardMessage}
                 </div>
-                <button onclick="restartGame()" class="btn btn-primary" style="margin: 5px;">🔄 Play Again</button>
-                <button onclick="location.reload()" class="btn btn-secondary" style="margin: 5px;">🖼️ Choose New Image</button>
-            </div>
-        `;
+            `;
+        }).catch(error => {
+            console.error('Error completing session:', error);
+            
+            // Show message anyway without leaderboard link
+            document.getElementById('gameMessage').innerHTML = `
+                <div style="text-align: center; padding: 20px;">
+                    <div style="font-size: 2em; margin-bottom: 10px;">🎉 PUZZLE SOLVED! 🎉</div>
+                    <div style="font-size: 1.2em; margin-bottom: 15px;">${rating}</div>
+                    <div style="margin-bottom: 15px;">
+                        <strong>Your Stats:</strong><br>
+                        ⏱️ Time: <strong>${timeStr}</strong><br>
+                        🎯 Moves: <strong>${moveCount}</strong>
+                    </div>
+                    <button onclick="restartGame()" class="btn btn-primary" style="margin: 5px;">🔄 Play Again</button>
+                    <button onclick="location.reload()" class="btn btn-secondary" style="margin: 5px;">🖼️ Choose New Image</button>
+                </div>
+            `;
+        });
         document.getElementById('gameMessage').style.color = '#27ae60';
         
         // Hide game controls
@@ -345,6 +514,9 @@ window.onload = function() {
                 
                 moveCount++;
                 document.getElementById('moveCounter').textContent = moveCount;
+                
+                // Update session with move count
+                updateMoveCount(moveCount);
                 
                 if (isPuzzleSolved()) {
                     handleGameWin();
