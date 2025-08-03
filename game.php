@@ -277,7 +277,7 @@ $userImages = getUserImages($conn, $playerId);
             justify-content: center;
             margin: 20px auto;
             background: #2c3e50;
-            padding: 15px;
+            padding: 10px 25px;
             border-radius: 15px;
             box-shadow: 0 8px 25px rgba(44, 62, 80, 0.3);
         }
