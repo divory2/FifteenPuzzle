@@ -106,9 +106,9 @@ if (isset($_GET['error'])) {
             <div>
                 <input type="submit" name="login" id="login" value="Login" data-value="login">
             </div>
-            
+            <br>
             <div>
-                <a href="registerForm.php" style="text-decoration: none;">
+                <a href="register.php" style="text-decoration: none;">
                     <input type="button" name="register" id="register" value="Register">
                 </a>
             </div>

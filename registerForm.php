@@ -10,20 +10,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Sanitize and validate input
     $player = trim($_POST['Player'] ?? '');
     $password = $_POST['password'] ?? '';
+    $confirmPassword = $_POST['confirmPassword'] ?? '';
     
     // Input validation
-    if (empty($player) || empty($password)) {
-        header("Location: login.php?error=missing_credentials");
+    if (empty($player) || empty($password) || empty($confirmPassword)) {
+        header("Location: register.php?error=missing_credentials&username=" . urlencode($player));
+        exit();
+    }
+    
+    if ($password !== $confirmPassword) {
+        header("Location: register.php?error=password_mismatch&username=" . urlencode($player));
         exit();
     }
     
     if (strlen($player) > 30) {
-        header("Location: login.php?error=username_too_long");
+        header("Location: register.php?error=username_too_long&username=" . urlencode($player));
         exit();
     }
     
     if (strlen($password) < 6) {
-        header("Location: login.php?error=password_too_short");
+        header("Location: register.php?error=password_too_short&username=" . urlencode($player));
         exit();
     }
     
@@ -46,7 +52,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         
         if (!$conn->query($createTableSQL)) {
             error_log("Error creating PLAYER table: " . $conn->error);
-            header("Location: login.php?error=database_error");
+            header("Location: register.php?error=database_error&username=" . urlencode($player));
             exit();
         }
 
@@ -54,7 +60,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $checkStmt = $conn->prepare("SELECT id, player FROM PLAYER WHERE player = ? LIMIT 1");
         if (!$checkStmt) {
             error_log("Prepare failed: " . $conn->error);
-            header("Location: login.php?error=database_error");
+            header("Location: register.php?error=database_error&username=" . urlencode($player));
             exit();
         }
         
@@ -65,7 +71,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if ($result->num_rows > 0) {
             // User already exists
             error_log("Registration attempt for existing user: " . $player);
-            header("Location: login.php?error=user_exists");
+            header("Location: register.php?error=user_exists&username=" . urlencode($player));
             exit();
         }
         
@@ -77,7 +83,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         
         if (!$insertStmt) {
             error_log("Prepare failed: " . $conn->error);
-            header("Location: login.php?error=database_error");
+            header("Location: register.php?error=database_error&username=" . urlencode($player));
             exit();
         }
         
@@ -99,7 +105,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             
         } else {
             error_log("Registration failed for user: " . $player . " - " . $insertStmt->error);
-            header("Location: login.php?error=registration_failed");
+            header("Location: register.php?error=registration_failed&username=" . urlencode($player));
             exit();
         }
         
@@ -107,7 +113,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         
     } catch (Exception $e) {
         error_log("Registration error: " . $e->getMessage());
-        header("Location: login.php?error=system_error");
+        header("Location: register.php?error=system_error&username=" . urlencode($player));
         exit();
     } finally {
         if (isset($conn)) {
@@ -116,7 +122,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 } else {
     // Not a POST request
-    header("Location: login.php?error=invalid_request");
+    header("Location: register.php?error=invalid_request");
     exit();
 }
 ?>

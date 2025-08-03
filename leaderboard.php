@@ -358,6 +358,21 @@ function formatDate($dateString) {
 </head>
 <body>
     <div class="leaderboard-container">
+        <div class="navigation">
+            <?php if ($isLoggedIn): ?>
+                <a href="game.php">🎮 Play Game</a>
+                <a href="index.php">🏠 Home</a>
+                <?php if ($_SESSION['role'] === 'admin'): ?>
+                    <a href="admin.php">👑 Admin Panel</a>
+                <?php endif; ?>
+                <a href="logout.php">🚪 Logout</a>
+            <?php else: ?>
+                <a href="login.php">🔑 Login</a>
+                <a href="register.php">📝 Register</a>
+                <a href="index.php">🏠 Home</a>
+            <?php endif; ?>
+        </div>
+        <br>
         <div class="leaderboard-header">
             <h1>🏆 Fifteen Puzzle Leaderboard</h1>
             <p>Compete with players around the world!</p>
@@ -535,7 +550,7 @@ function formatDate($dateString) {
                 <a href="logout.php">🚪 Logout</a>
             <?php else: ?>
                 <a href="login.php">🔑 Login</a>
-                <a href="registerForm.php">📝 Register</a>
+                <a href="register.php">📝 Register</a>
                 <a href="index.php">🏠 Home</a>
             <?php endif; ?>
         </div>
